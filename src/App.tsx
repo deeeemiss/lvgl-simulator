@@ -42,6 +42,13 @@ export default function App() {
 
   const handleRun = useCallback(() => { setLiveMode(true); run(code); }, [run, code]);
 
+  const handleStop = useCallback(() => {
+    setLiveMode(false);
+    reenterLiveRef.current = false;
+    if (autoRunTimer.current) clearTimeout(autoRunTimer.current);
+    stop();
+  }, [stop]);
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!(e.ctrlKey || e.metaKey)) return;
@@ -51,13 +58,6 @@ export default function App() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [run, code, handleStop]);
-
-  const handleStop = useCallback(() => {
-    setLiveMode(false);
-    reenterLiveRef.current = false;
-    if (autoRunTimer.current) clearTimeout(autoRunTimer.current);
-    stop();
-  }, [stop]);
 
   const handleResolutionChange = useCallback((r: Resolution) => {
     if (r.label === prevResolutionRef.current.label) return;
