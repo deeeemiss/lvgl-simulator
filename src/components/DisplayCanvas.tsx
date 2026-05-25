@@ -160,9 +160,17 @@ export function DisplayCanvas({ iframeRef, resolution, cArtifactId, showPlacehol
             id="lvgl-canvas"
             width={resolution.width}
             height={resolution.height}
-            style={{ display: 'block', width: '100%', height: '100%' }}
+            style={{ display: 'block', width: '100%', height: '100%', visibility: cArtifactId ? 'hidden' : 'visible' }}
           />
-          {showPlaceholder && (
+          <iframe
+            ref={iframeRef}
+            src={src}
+            style={cArtifactId
+              ? { position: 'absolute', inset: 0, width: '100%', height: '100%', border: 'none', display: 'block' } as React.CSSProperties
+              : { display: 'none', width: 0, height: 0, border: 'none' }}
+            title="LVGL WASM runner"
+          />
+          {showPlaceholder && !cArtifactId && (
             <div style={{
               position: 'absolute', inset: 0,
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -199,12 +207,7 @@ export function DisplayCanvas({ iframeRef, resolution, cArtifactId, showPlacehol
         </div>
       )}
 
-      <iframe
-        ref={iframeRef}
-        src={src}
-        style={{ display: 'none', width: 0, height: 0, border: 'none' }}
-        title="LVGL WASM runner"
-      />
+
     </div>
   );
 }

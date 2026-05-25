@@ -3,12 +3,17 @@
 <head>
   <meta charset="utf-8">
   <title>LVGL C Runner</title>
-  <style>* { margin: 0; padding: 0; } body { overflow: hidden; }</style>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+    canvas#canvas { display: block; width: 100%; height: 100%; }
+  </style>
 </head>
 <body>
+  <canvas id="canvas"></canvas>
   <script>
     var params = new URLSearchParams(location.search);
-    var id = params.get('id');
+    var id     = params.get('id');
 
     function notifyParent(type, payload) {
       try {
@@ -20,37 +25,24 @@
     if (!id) {
       notifyParent('error', { message: 'c-runner: no artifact id' });
     } else {
-      // Point SDL2 directly at the parent lvgl-canvas — same technique as micropython runner.
-      // Same-origin so cross-frame DOM access is allowed.
-      var parentCanvas = null;
-      try { parentCanvas = window.parent.document.getElementById('lvgl-canvas'); } catch(e) {}
+      window.Module = {
+        print:    function(text) { notifyParent('stdout', { text: text }); },
+        printErr: function(text) { notifyParent('stderr', { text: text }); },
+        quit: function(status) {
+          if (status !== 0) {
+            notifyParent('error', { message: 'Program exited with status ' + status });
+            notifyParent('status', { status: 'error' });
+          }
+        },
+      };
 
-      if (!parentCanvas) {
-        notifyParent('error', { message: 'c-runner: parent lvgl-canvas not found' });
-      } else {
-        var Module = {
-          canvas: parentCanvas,
-          arguments: [],
-          noInitialRun: false,
-          print: function(text) { notifyParent('stdout', { text: text }); },
-          printErr: function(text) { notifyParent('stderr', { text: text }); },
-          quit: function(status) {
-            if (status !== 0) {
-              notifyParent('error', { message: 'Program exited with status ' + status });
-              notifyParent('status', { status: 'error' });
-            }
-          },
-        };
-        window.Module = Module;
-
-        var script = document.createElement('script');
-        script.src = '/api/artifact/' + id + '/output.js';
-        script.onerror = function() {
-          notifyParent('error', { message: 'Failed to load artifact: ' + id });
-          notifyParent('status', { status: 'error' });
-        };
-        document.body.appendChild(script);
-      }
+      var script     = document.createElement('script');
+      script.src     = '/api/artifact/' + id + '/output.js';
+      script.onerror = function() {
+        notifyParent('error', { message: 'Failed to load artifact: ' + id });
+        notifyParent('status', { status: 'error' });
+      };
+      document.body.appendChild(script);
     }
   </script>
 </body>
