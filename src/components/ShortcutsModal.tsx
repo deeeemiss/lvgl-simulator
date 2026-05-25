@@ -1,30 +1,35 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTheme } from '../ThemeContext';
+
+const IS_MAC = typeof navigator !== 'undefined' && /Mac|iPhone|iPod|iPad/.test(navigator.platform);
+const MOD = IS_MAC ? '⌘' : 'Ctrl';
 
 const SHORTCUTS = [
   { section: 'App' },
-  { keys: ['Ctrl', 'Enter'], label: 'Run' },
-  { keys: ['Ctrl', '.'],     label: 'Stop' },
+  { keys: [MOD, 'Enter'], label: 'Run' },
+  { keys: [MOD, '.'],     label: 'Stop' },
   { section: 'Editor' },
-  { keys: ['Ctrl', '/'],         label: 'Toggle comment' },
+  { keys: [MOD, '/'],            label: 'Toggle comment' },
   { keys: ['Shift', 'Alt', 'F'], label: 'Format document' },
-  { keys: ['Ctrl', 'D'],         label: 'Select next occurrence' },
+  { keys: [MOD, 'D'],            label: 'Select next occurrence' },
   { keys: ['Alt', '↑ / ↓'],      label: 'Move line up / down' },
-  { keys: ['Ctrl', 'Shift', 'K'],label: 'Delete line' },
-  { keys: ['Ctrl', 'Z'],         label: 'Undo' },
-  { keys: ['Ctrl', 'Shift', 'Z'],label: 'Redo' },
-  { keys: ['Ctrl', 'F'],         label: 'Find' },
-  { keys: ['Ctrl', 'H'],         label: 'Find & replace' },
-  { keys: ['Ctrl', 'Shift', 'P'],label: 'Command palette' },
+  { keys: [MOD, 'Shift', 'K'],   label: 'Delete line' },
+  { keys: [MOD, 'Z'],            label: 'Undo' },
+  { keys: [MOD, 'Shift', 'Z'],   label: 'Redo' },
+  { keys: [MOD, 'F'],            label: 'Find' },
+  { keys: [MOD, 'H'],            label: 'Find & replace' },
+  { keys: [MOD, 'Shift', 'P'],   label: 'Command palette' },
 ] as const;
 
 export function ShortcutsModal() {
+  const { theme } = useTheme();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
-    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setOpen(false); }
-    function onClick(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
     document.addEventListener('keydown', onKey);
     document.addEventListener('mousedown', onClick);
     return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('mousedown', onClick); };
@@ -32,25 +37,11 @@ export function ShortcutsModal() {
 
   return (
     <>
-      <button
-        onClick={() => setOpen(o => !o)}
-        title="Keyboard shortcuts"
-        style={{
-          background: 'none',
-          border: '1px solid #333',
-          borderRadius: 4,
-          color: '#666',
-          cursor: 'pointer',
-          width: 26, height: 26,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 13, fontWeight: 600,
-          transition: 'color 0.12s ease, border-color 0.12s ease',
-          flexShrink: 0,
-        }}
-        onMouseEnter={e => { e.currentTarget.style.color = '#ccc'; e.currentTarget.style.borderColor = '#555'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = '#666'; e.currentTarget.style.borderColor = '#333'; }}
-      >
-        ?
+      <button className="lvgl-icon-btn" onClick={() => setOpen(o => !o)} title="Keyboard shortcuts">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="4" width="20" height="16" rx="2"/>
+          <path d="M6 8h.001M10 8h.001M14 8h.001M18 8h.001M8 12h.001M12 12h.001M16 12h.001M7 16h10"/>
+        </svg>
       </button>
 
       {open && (
@@ -60,26 +51,21 @@ export function ShortcutsModal() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
           <div ref={ref} style={{
-            background: '#1e1e1e',
-            border: '1px solid #333',
-            borderRadius: 8,
-            padding: '20px 24px',
-            minWidth: 320,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+            background: theme.bgToolbar,
+            border: `1px solid ${theme.borderSubtle}`,
+            borderRadius: 8, padding: '20px 24px', minWidth: 320,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
-              <span style={{ color: '#ccc', fontWeight: 600, fontSize: 14, flex: 1 }}>Keyboard Shortcuts</span>
-              <button
-                onClick={() => setOpen(false)}
-                style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0 }}
-              >×</button>
+              <span style={{ color: theme.textPrimary, fontWeight: 600, fontSize: 14, flex: 1 }}>Keyboard Shortcuts</span>
+              <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', color: theme.textMuted, cursor: 'pointer', fontSize: 20, lineHeight: 1, padding: 0 }}>×</button>
             </div>
             <table style={{ borderCollapse: 'collapse', width: '100%' }}>
               <tbody>
                 {SHORTCUTS.map((row, i) => {
                   if ('section' in row) return (
                     <tr key={i}>
-                      <td colSpan={2} style={{ color: '#666', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, paddingTop: i === 0 ? 0 : 14, paddingBottom: 6 }}>
+                      <td colSpan={2} style={{ color: theme.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, paddingTop: i === 0 ? 0 : 14, paddingBottom: 6 }}>
                         {row.section}
                       </td>
                     </tr>
@@ -90,14 +76,14 @@ export function ShortcutsModal() {
                         <span style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                           {row.keys.map((k, ki) => (
                             <kbd key={ki} style={{
-                              background: '#2d2d2d', border: '1px solid #444',
+                              background: 'var(--bg-surface)', border: '1px solid var(--border-input)',
                               borderRadius: 3, padding: '1px 6px', fontSize: 11,
-                              color: '#bbb', fontFamily: 'inherit',
+                              color: 'var(--text-secondary)', fontFamily: 'inherit',
                             }}>{k}</kbd>
                           ))}
                         </span>
                       </td>
-                      <td style={{ color: '#aaa', fontSize: 12, paddingBottom: 6 }}>{row.label}</td>
+                      <td style={{ color: theme.textSecondary, fontSize: 12, paddingBottom: 6 }}>{row.label}</td>
                     </tr>
                   );
                 })}

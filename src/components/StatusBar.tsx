@@ -1,4 +1,5 @@
 import { useRef, useCallback, useEffect } from 'react';
+import { useTheme } from '../ThemeContext';
 import type { SimulatorOutput } from '../hooks/useSimulator';
 
 interface StatusBarProps {
@@ -30,6 +31,7 @@ function loadHeight(): number {
 }
 
 export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
+  const { theme } = useTheme();
   const heightRef = useRef(loadHeight());
   const containerRef = useRef<HTMLDivElement>(null);
   const dragging = useRef(false);
@@ -72,11 +74,11 @@ export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
         display: 'flex',
         alignItems: 'center',
         padding: '2px 12px',
-        borderBottom: '1px solid #222',
+        borderBottom: `1px solid ${theme.border}`,
         minHeight: 26,
         flexShrink: 0,
       }}>
-        <span style={{ color: '#666', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>
+        <span style={{ color: theme.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>
           Output
         </span>
         <button className="lvgl-clear-btn" onClick={onClear}>Clear</button>
@@ -89,7 +91,7 @@ export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
         fontSize: 12,
       }}>
         {output.length === 0 ? (
-          <span style={{ color: '#444' }}>No output yet. Click Run to execute your script.</span>
+          <span style={{ color: theme.textMuted }}>No output yet. Click Run to execute your script.</span>
         ) : (
           output.map((entry, i) => (
             <div key={i} style={{ color: TYPE_COLORS[entry.type], lineHeight: 1.6 }}>
@@ -106,8 +108,8 @@ export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
   return (
     <div ref={containerRef} style={{
       height: heightRef.current,
-      background: '#0d0d0d',
-      borderTop: '1px solid #333',
+      background: theme.bgStatusbar,
+      borderTop: `1px solid ${theme.border}`,
       display: 'flex',
       flexDirection: 'column',
       flexShrink: 0,
@@ -117,11 +119,11 @@ export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
         display: 'flex',
         alignItems: 'center',
         padding: '2px 12px',
-        borderBottom: '1px solid #222',
+        borderBottom: `1px solid ${theme.border}`,
         minHeight: 26,
         flexShrink: 0,
       }}>
-        <span style={{ color: '#666', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>
+        <span style={{ color: theme.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>
           Output
         </span>
         <button className="lvgl-clear-btn" onClick={onClear}>Clear</button>
@@ -134,7 +136,7 @@ export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
         fontSize: 12,
       }}>
         {output.length === 0 ? (
-          <span style={{ color: '#444' }}>No output yet. Click Run to execute your script.</span>
+          <span style={{ color: theme.textMuted }}>No output yet. Click Run to execute your script.</span>
         ) : (
           output.map((entry, i) => (
             <div key={i} style={{ color: TYPE_COLORS[entry.type], lineHeight: 1.6 }}>

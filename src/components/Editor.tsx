@@ -1,4 +1,5 @@
 import MonacoEditor from '@monaco-editor/react';
+import { useTheme } from '../ThemeContext';
 
 const DEFAULT_CODE = `import lvgl as lv
 
@@ -20,13 +21,14 @@ interface EditorProps {
 }
 
 export function Editor({ value = DEFAULT_CODE, language = 'python', onChange }: EditorProps) {
+  const { theme } = useTheme();
   return (
     <MonacoEditor
       height="100%"
       language={language}
       value={value}
       onChange={v => onChange?.(v ?? '')}
-      theme="vs-dark"
+      theme={theme.monacoTheme}
       options={{
         fontSize: 14,
         minimap: { enabled: false },

@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
+import { useTheme } from '../ThemeContext';
 
 export interface Resolution {
   label: string;
@@ -74,6 +75,7 @@ const IconPopout = () => (
 );
 
 export function DisplayCanvas({ iframeRef, resolution, showPlaceholder, liveMode, onPopoutChange }: DisplayCanvasProps) {
+  const { theme } = useTheme();
   const versionRef  = useRef<string>(String(Date.now()));
   const canvasWrapRef = useRef<HTMLDivElement>(null);
   const popupRef    = useRef<Window | null>(null);
@@ -121,7 +123,7 @@ export function DisplayCanvas({ iframeRef, resolution, showPlaceholder, liveMode
       alignItems: 'center',
       justifyContent: 'center',
       height: '100%',
-      background: '#1a1a2e',
+      background: theme.bgPanel,
       padding: 16,
       gap: 10,
       overflow: 'hidden',
@@ -144,7 +146,7 @@ export function DisplayCanvas({ iframeRef, resolution, showPlaceholder, liveMode
             position: 'relative',
             width: `min(100%, calc(${aspectRatio.toFixed(6)} * 100cqh))`,
             aspectRatio: `${resolution.width} / ${resolution.height}`,
-            border: '2px solid #333',
+            border: `2px solid ${theme.borderSubtle}`,
             borderRadius: 4,
             overflow: 'hidden',
             boxShadow: '0 4px 32px rgba(0,0,0,0.6)',

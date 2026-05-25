@@ -1,131 +1,124 @@
 *, *::before, *::after { box-sizing: border-box; }
 body, html, #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
+  margin: 0; padding: 0; height: 100%; overflow: hidden;
+}
+
+/* ── CSS custom properties ───────────────────────────────────── */
+:root {
+  --bg-surface:       #252525;
+  --bg-surface-hover: #333;
+  --bg-input:         #2d2d2d;
+  --border-input:     #3d3d3d;
+  --border-hover:     #555;
+  --text-primary:     #ccc;
+  --text-secondary:   #aaa;
+  --text-disabled:    #555;
+  --text-muted:       #666;
+  --github-bg:        #21262d;
+  --github-border:    #30363d;
+  --github-bg-hover:  #30363d;
+  --github-border-hover: #8b949e;
+}
+[data-theme="light"] {
+  --bg-surface:       #efefef;
+  --bg-surface-hover: #e2e2e2;
+  --bg-input:         #f5f5f5;
+  --border-input:     #d0d0d0;
+  --border-hover:     #999;
+  --text-primary:     #1a1a1a;
+  --text-secondary:   #555;
+  --text-disabled:    #bbb;
+  --text-muted:       #888;
+  --github-bg:        #f0f0f0;
+  --github-border:    #d0d0d0;
+  --github-bg-hover:  #e2e2e2;
+  --github-border-hover: #999;
 }
 
 /* ── Toolbar buttons ─────────────────────────────────────────── */
 .lvgl-btn {
-  border: none;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 5px 16px;
-  cursor: pointer;
+  border: none; border-radius: 4px; font-size: 13px; font-weight: 600;
+  padding: 5px 16px; cursor: pointer;
   transition: filter 0.12s ease, transform 0.08s ease;
-  user-select: none;
-  outline: none;
+  user-select: none; outline: none;
 }
 .lvgl-btn:not(:disabled):hover  { filter: brightness(1.18); }
 .lvgl-btn:not(:disabled):active { transform: scale(0.95); filter: brightness(0.92); }
 .lvgl-btn:disabled { cursor: not-allowed; }
 
 .lvgl-btn-run          { background: #4caf50; color: #fff; }
-.lvgl-btn-run:disabled { background: #2a2a2a; color: #555; }
+.lvgl-btn-run:disabled { background: var(--bg-surface); color: var(--text-disabled); }
 
 .lvgl-btn-stop          { background: #f44336; color: #fff; }
-.lvgl-btn-stop:disabled { background: #2a2a2a; color: #555; }
+.lvgl-btn-stop:disabled { background: var(--bg-surface); color: var(--text-disabled); }
 
 .lvgl-btn-open {
-  background: #2d2d2d;
-  color: #aaa;
-  border: 1px solid #3d3d3d;
-  font-weight: 500;
-  padding: 5px 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  background: var(--bg-input); color: var(--text-secondary);
+  border: 1px solid var(--border-input); font-weight: 500;
+  padding: 5px 12px; display: flex; align-items: center; gap: 6px;
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.08s ease;
 }
-.lvgl-btn-open:hover  { background: #363636; border-color: #555; color: #fff; }
-.lvgl-btn-open:active { transform: scale(0.95); background: #222; }
+.lvgl-btn-open:hover  { background: var(--bg-surface-hover); border-color: var(--border-hover); color: var(--text-primary); }
+.lvgl-btn-open:active { transform: scale(0.95); }
 
 /* ── Resolution select ───────────────────────────────────────── */
 .lvgl-select {
-  padding: 4px 8px;
-  background: #2d2d2d;
-  color: #aaa;
-  border: 1px solid #3d3d3d;
-  border-radius: 4px;
-  font-size: 13px;
-  cursor: pointer;
-  outline: none;
+  padding: 4px 8px; background: var(--bg-input); color: var(--text-secondary);
+  border: 1px solid var(--border-input); border-radius: 4px; font-size: 13px;
+  cursor: pointer; outline: none;
   transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
 }
-.lvgl-select:hover  { border-color: #555; background: #333; color: #ccc; }
-.lvgl-select:focus  { border-color: #666; color: #ccc; }
-.lvgl-select option { background: #1e1e1e; }
+.lvgl-select:hover  { border-color: var(--border-hover); background: var(--bg-surface-hover); color: var(--text-primary); }
+.lvgl-select:focus  { border-color: var(--border-hover); color: var(--text-primary); }
+.lvgl-select option { background: var(--bg-input); }
+
+/* ── Icon-only toolbar buttons (theme toggle, shortcuts) ─────── */
+.lvgl-icon-btn {
+  background: none; border: 1px solid var(--border-input); border-radius: 4px;
+  color: var(--text-muted); cursor: pointer;
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  transition: color 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+  flex-shrink: 0; outline: none; padding: 0;
+}
+.lvgl-icon-btn:hover  { color: var(--text-primary); border-color: var(--border-hover); background: var(--bg-surface); }
+.lvgl-icon-btn:active { transform: scale(0.92); }
 
 /* ── Status-bar drag handle ──────────────────────────────────── */
 .lvgl-drag-handle {
-  height: 5px;
-  background: transparent;
-  cursor: ns-resize;
-  flex-shrink: 0;
+  height: 5px; background: transparent; cursor: ns-resize; flex-shrink: 0;
   transition: background 0.15s ease;
 }
-.lvgl-drag-handle:hover { background: #3a3a3a; }
-.lvgl-drag-handle:active { background: #555; }
+.lvgl-drag-handle:hover  { background: var(--bg-surface-hover); }
+.lvgl-drag-handle:active { background: var(--border-hover); }
 
 /* ── Output clear button ─────────────────────────────────────── */
 .lvgl-clear-btn {
-  margin-left: auto;
-  background: none;
-  border: none;
-  color: #555;
-  cursor: pointer;
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 3px;
-  transition: color 0.12s ease, background 0.12s ease;
-  outline: none;
+  margin-left: auto; background: none; border: none; color: var(--text-muted);
+  cursor: pointer; font-size: 11px; padding: 2px 8px; border-radius: 3px;
+  transition: color 0.12s ease, background 0.12s ease; outline: none;
 }
-.lvgl-clear-btn:hover  { color: #bbb; background: #1e1e1e; }
-.lvgl-clear-btn:active { color: #fff; }
-
-/* ── Fullscreen: maintain aspect ratio ───────────────────────── */
-.lvgl-canvas-wrap:-webkit-full-screen {
-  background: #000 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-.lvgl-canvas-wrap:fullscreen {
-  background: #000 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-.lvgl-canvas-wrap:-webkit-full-screen canvas {
-  width: auto !important;
-  height: auto !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-}
-.lvgl-canvas-wrap:fullscreen canvas {
-  width: auto !important;
-  height: auto !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-}
+.lvgl-clear-btn:hover  { color: var(--text-primary); background: var(--bg-surface); }
+.lvgl-clear-btn:active { color: var(--text-primary); }
 
 /* ── Preview control buttons (below canvas) ─────────────────── */
 .lvgl-preview-btn {
-  background: #252525;
-  border: 1px solid #383838;
-  border-radius: 4px;
-  color: #888;
-  cursor: pointer;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
+  background: var(--bg-surface); border: 1px solid var(--border-input);
+  border-radius: 4px; color: var(--text-muted); cursor: pointer;
+  padding: 5px 10px; display: flex; align-items: center; gap: 5px; font-size: 12px;
   transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.08s ease;
-  white-space: nowrap;
-  outline: none;
+  white-space: nowrap; outline: none;
 }
-.lvgl-preview-btn:hover  { background: #333; border-color: #555; color: #ddd; }
+.lvgl-preview-btn:hover  { background: var(--bg-surface-hover); border-color: var(--border-hover); color: var(--text-primary); }
 .lvgl-preview-btn:active { transform: scale(0.95); }
+
+/* ── Fullscreen: maintain aspect ratio ───────────────────────── */
+.lvgl-canvas-wrap:-webkit-full-screen {
+  background: #000 !important; display: flex !important;
+  align-items: center !important; justify-content: center !important;
+}
+.lvgl-canvas-wrap:fullscreen {
+  background: #000 !important; display: flex !important;
+  align-items: center !important; justify-content: center !important;
+}
+.lvgl-canvas-wrap:-webkit-full-screen canvas { width: auto !important; height: auto !important; max-width: 100% !important; max-height: 100% !important; }
+.lvgl-canvas-wrap:fullscreen canvas { width: auto !important; height: auto !important; max-width: 100% !important; max-height: 100% !important; }

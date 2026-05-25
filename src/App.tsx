@@ -5,10 +5,12 @@ import type { Resolution } from './components/DisplayCanvas';
 import { Toolbar } from './components/Toolbar';
 import { StatusBar } from './components/StatusBar';
 import { useSimulator } from './hooks/useSimulator';
+import { useTheme } from './ThemeContext';
 
 const AUTO_RUN_DELAY = 800;
 
 export default function App() {
+  const { theme } = useTheme();
   const [code, setCode] = useState(DEFAULT_CODE);
   const [resolution, setResolution] = useState<Resolution>(RESOLUTIONS[0]);
   const [liveMode, setLiveMode] = useState(false);
@@ -71,8 +73,8 @@ export default function App() {
       display: 'flex',
       flexDirection: 'column',
       height: '100vh',
-      background: '#1e1e1e',
-      color: '#ccc',
+      background: theme.bgMain,
+      color: theme.textPrimary,
       fontFamily: 'system-ui, sans-serif',
       overflow: 'hidden',
     }}>
@@ -92,7 +94,7 @@ export default function App() {
           <Editor value={code} language={language} onChange={setCode} />
         </div>
 
-        <div style={{ width: 1, background: '#333', flexShrink: 0 }} />
+        <div style={{ width: 1, background: theme.borderSubtle, flexShrink: 0 }} />
 
         {/* Preview panel: hidden (display:none) when popout open so iframe/WASM stays alive */}
         <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: popoutOpen ? 'none' : undefined }}>
@@ -107,8 +109,8 @@ export default function App() {
 
         {/* When popped out: show StatusBar in the right panel */}
         {popoutOpen && (
-          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderLeft: '1px solid #333' }}>
-            <div style={{ padding: '8px 12px', borderBottom: '1px solid #2a2a2a', color: '#666', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, flexShrink: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderLeft: `1px solid ${theme.borderSubtle}` }}>
+            <div style={{ padding: '8px 12px', borderBottom: `1px solid ${theme.border}`, color: theme.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, flexShrink: 0 }}>
               Output — preview in external window
             </div>
             <StatusBar output={output} onClear={clearOutput} embedded />
