@@ -56,9 +56,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         return s;
       }
     } catch {}
-    const auto: ThemeName = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-    document.documentElement.dataset.theme = auto;
-    return auto;
+    document.documentElement.dataset.theme = 'dark';
+    return 'dark';
   });
 
   useEffect(() => {
