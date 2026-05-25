@@ -16,6 +16,7 @@ export const RESOLUTIONS: Resolution[] = [
 interface DisplayCanvasProps {
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
   resolution: Resolution;
+  cArtifactId?: string | null;
   showPlaceholder?: boolean;
   liveMode?: boolean;
   onPopoutChange?: (open: boolean) => void;
@@ -74,7 +75,7 @@ const IconPopout = () => (
   </svg>
 );
 
-export function DisplayCanvas({ iframeRef, resolution, showPlaceholder, liveMode, onPopoutChange }: DisplayCanvasProps) {
+export function DisplayCanvas({ iframeRef, resolution, cArtifactId, showPlaceholder, liveMode, onPopoutChange }: DisplayCanvasProps) {
   const { theme } = useTheme();
   const versionRef  = useRef<string>(String(Date.now()));
   const canvasWrapRef = useRef<HTMLDivElement>(null);
@@ -82,7 +83,9 @@ export function DisplayCanvas({ iframeRef, resolution, showPlaceholder, liveMode
   const pollRef     = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const src = `/lvgl-runner.html?w=${resolution.width}&h=${resolution.height}&v=${versionRef.current}`;
+  const src = cArtifactId
+    ? `/c-runner.html?id=${cArtifactId}&w=${resolution.width}&h=${resolution.height}`
+    : `/lvgl-runner.html?w=${resolution.width}&h=${resolution.height}&v=${versionRef.current}`;
   const aspectRatio = resolution.width / resolution.height;
 
   useEffect(() => {

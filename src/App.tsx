@@ -17,7 +17,7 @@ export default function App() {
   const [liveMode, setLiveMode] = useState(false);
   const [popoutOpen, setPopoutOpen] = useState(false);
   const [language, setLanguage] = useState('python');
-  const { status, output, iframeRef, run, stop, clearOutput } = useSimulator();
+  const { status, output, iframeRef, cArtifactId, run, stop, clearOutput } = useSimulator();
   const prevResolutionRef = useRef(resolution);
   const autoRunTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevCodeRef = useRef<string | null>(null);
@@ -152,6 +152,7 @@ export default function App() {
         <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: popoutOpen ? 'none' : undefined }}>
           <DisplayCanvas
             iframeRef={iframeRef}
+            cArtifactId={cArtifactId}
             resolution={resolution}
             showPlaceholder={!liveMode && status !== 'compiling'}
             liveMode={liveMode}

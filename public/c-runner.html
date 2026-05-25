@@ -3,80 +3,54 @@
 <head>
   <meta charset="utf-8">
   <title>LVGL C Runner</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; overflow: hidden; }
-    canvas { display: block; }
-  </style>
+  <style>* { margin: 0; padding: 0; } body { overflow: hidden; }</style>
 </head>
 <body>
-  <!-- SDL2 renders into this canvas; we mirror it to the parent lvgl-canvas via rAF -->
-  <canvas id="canvas"></canvas>
   <script>
-    var params  = new URLSearchParams(location.search);
-    var id      = params.get('id');
-    var W       = parseInt(params.get('w') || '480', 10);
-    var H       = parseInt(params.get('h') || '320', 10);
-
-    var canvas = document.getElementById('canvas');
-    canvas.width  = W;
-    canvas.height = H;
+    var params = new URLSearchParams(location.search);
+    var id = params.get('id');
 
     function notifyParent(type, payload) {
       try {
-        if (window.parent && window.parent !== window) {
+        if (window.parent && window.parent !== window)
           window.parent.postMessage(Object.assign({ type: type }, payload), '*');
-        }
       } catch(e) {}
     }
-
-    // Mirror local SDL canvas → parent lvgl-canvas at 60 fps
-    function startMirror() {
-      var dst = null;
-      try { dst = window.parent.document.getElementById('lvgl-canvas'); } catch(e) {}
-      if (!dst) { requestAnimationFrame(startMirror); return; }
-      var ctx = dst.getContext('2d');
-      function draw() {
-        try { ctx.drawImage(canvas, 0, 0, dst.width, dst.height); } catch(e) {}
-        requestAnimationFrame(draw);
-      }
-      draw();
-    }
-    startMirror();
 
     if (!id) {
       notifyParent('error', { message: 'c-runner: no artifact id' });
     } else {
-      // Configure Module before emscripten script loads
-      var Module = {
-        canvas: canvas,
-        arguments: [],
-        noInitialRun: false,
-        onRuntimeInitialized: function() {
-          // main() is called automatically; status is posted from C via EM_ASM
-        },
-        print: function(text) {
-          notifyParent('stdout', { text: text });
-        },
-        printErr: function(text) {
-          notifyParent('stderr', { text: text });
-        },
-        quit: function(status) {
-          if (status !== 0) {
-            notifyParent('error', { message: 'Program exited with status ' + status });
-            notifyParent('status', { status: 'error' });
-          }
-        },
-      };
-      window.Module = Module;
+      // Point SDL2 directly at the parent lvgl-canvas — same technique as micropython runner.
+      // Same-origin so cross-frame DOM access is allowed.
+      var parentCanvas = null;
+      try { parentCanvas = window.parent.document.getElementById('lvgl-canvas'); } catch(e) {}
 
-      var script = document.createElement('script');
-      script.src = '/api/artifact/' + id + '/output.js';
-      script.onerror = function() {
-        notifyParent('error', { message: 'Failed to load compiled artifact: ' + id });
-        notifyParent('status', { status: 'error' });
-      };
-      document.body.appendChild(script);
+      if (!parentCanvas) {
+        notifyParent('error', { message: 'c-runner: parent lvgl-canvas not found' });
+      } else {
+        var Module = {
+          canvas: parentCanvas,
+          arguments: [],
+          noInitialRun: false,
+          print: function(text) { notifyParent('stdout', { text: text }); },
+          printErr: function(text) { notifyParent('stderr', { text: text }); },
+          quit: function(status) {
+            if (status !== 0) {
+              notifyParent('error', { message: 'Program exited with status ' + status });
+              notifyParent('status', { status: 'error' });
+            }
+          },
+        };
+        window.Module = Module;
+
+        var script = document.createElement('script');
+        script.src = '/api/artifact/' + id + '/output.js';
+        script.onerror = function() {
+          notifyParent('error', { message: 'Failed to load artifact: ' + id });
+          notifyParent('status', { status: 'error' });
+        };
+        document.body.appendChild(script);
+      }
     }
   </script>
 </body>
