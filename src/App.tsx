@@ -13,6 +13,7 @@ export default function App() {
   const [resolution, setResolution] = useState<Resolution>(RESOLUTIONS[0]);
   const [liveMode, setLiveMode] = useState(false);
   const [popoutOpen, setPopoutOpen] = useState(false);
+  const [language, setLanguage] = useState('python');
   const { status, output, iframeRef, run, stop, clearOutput } = useSimulator();
   const prevResolutionRef = useRef(resolution);
   const autoRunTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -37,9 +38,19 @@ export default function App() {
     return () => { if (autoRunTimer.current) clearTimeout(autoRunTimer.current); };
   }, [code, run, liveMode]);
 
-  const handleFileLoad = useCallback((text: string) => { setCode(text); }, []);
+  const handleFileLoad = useCallback((text: string, lang: string) => { setCode(text); setLanguage(lang); }, []);
 
   const handleRun = useCallback(() => { setLiveMode(true); run(code); }, [run, code]);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.key === 'Enter') { e.preventDefault(); setLiveMode(m => { if (!m) { run(code); return true; } return m; }); }
+      if (e.key === '.')     { e.preventDefault(); handleStop(); }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [run, code, handleStop]);
 
   const handleStop = useCallback(() => {
     setLiveMode(false);
@@ -78,7 +89,7 @@ export default function App() {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Editor — always visible */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <Editor value={code} onChange={setCode} />
+          <Editor value={code} language={language} onChange={setCode} />
         </div>
 
         <div style={{ width: 1, background: '#333', flexShrink: 0 }} />

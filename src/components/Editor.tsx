@@ -15,14 +15,15 @@ print("green rect done")
 
 interface EditorProps {
   value?: string;
+  language?: string;
   onChange?: (value: string) => void;
 }
 
-export function Editor({ value = DEFAULT_CODE, onChange }: EditorProps) {
+export function Editor({ value = DEFAULT_CODE, language = 'python', onChange }: EditorProps) {
   return (
     <MonacoEditor
       height="100%"
-      defaultLanguage="python"
+      language={language}
       value={value}
       onChange={v => onChange?.(v ?? '')}
       theme="vs-dark"

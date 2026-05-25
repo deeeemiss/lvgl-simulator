@@ -14,6 +14,7 @@ function useGitHubStars() {
   return stars;
 }
 import { RESOLUTIONS } from './DisplayCanvas';
+import { ShortcutsModal } from './ShortcutsModal';
 import type { Resolution } from './DisplayCanvas';
 import type { SimulatorStatus } from '../hooks/useSimulator';
 
@@ -24,7 +25,7 @@ interface ToolbarProps {
   onRun: () => void;
   onStop: () => void;
   onResolutionChange: (r: Resolution) => void;
-  onFileLoad: (content: string) => void;
+  onFileLoad: (content: string, language: string) => void;
 }
 
 const STATUS_LABELS: Record<SimulatorStatus, string> = {
@@ -92,10 +93,14 @@ export function Toolbar({ status, liveMode, resolution, onRun, onStop, onResolut
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const language = ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'h' ? 'cpp'
+                   : ext === 'c' ? 'c'
+                   : 'python';
     const reader = new FileReader();
     reader.onload = ev => {
       const text = ev.target?.result;
-      if (typeof text === 'string') onFileLoad(text);
+      if (typeof text === 'string') onFileLoad(text, language);
     };
     reader.readAsText(file);
     e.target.value = '';
@@ -122,7 +127,7 @@ export function Toolbar({ status, liveMode, resolution, onRun, onStop, onResolut
       <input
         ref={fileInputRef}
         type="file"
-        accept=".py,text/plain"
+        accept=".py,.c,.cpp,.cc,.cxx,.h,.hpp,text/plain"
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
@@ -170,6 +175,7 @@ export function Toolbar({ status, liveMode, resolution, onRun, onStop, onResolut
             {liveMode ? 'Live' : STATUS_LABELS[status]}
           </span>
         </div>
+        <ShortcutsModal />
         <GitHubButton stars={stars} />
       </div>
     </div>
