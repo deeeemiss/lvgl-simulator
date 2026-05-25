@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Editor, DEFAULT_CODE } from './components/Editor';
+import { Editor, DEFAULT_CODE, DEFAULT_CODES } from './components/Editor';
+import { LanguageSelector } from './components/LanguageSelector';
 import { DisplayCanvas, RESOLUTIONS } from './components/DisplayCanvas';
 import type { Resolution } from './components/DisplayCanvas';
 import { Toolbar } from './components/Toolbar';
@@ -48,6 +49,14 @@ export default function App() {
   }, [code, runWithContext, liveMode, language]);
 
   const handleFileLoad = useCallback((text: string, lang: string) => { setCode(text); setLanguage(lang); }, []);
+
+  const handleLanguageChange = useCallback((lang: string) => {
+    setCode(prev => {
+      const isDefault = Object.values(DEFAULT_CODES).some(d => d === prev);
+      return isDefault ? (DEFAULT_CODES[lang] ?? prev) : prev;
+    });
+    setLanguage(lang);
+  }, []);
 
   const handleRun = useCallback(() => { setLiveMode(true); runWithContext(code); }, [runWithContext, code]);
 
@@ -122,6 +131,7 @@ export default function App() {
               C/C++ — code gets compiled server-side via emscripten. Define <code style={{ fontFamily: 'monospace', background: '#fff1', padding: '0 3px', borderRadius: 2 }}>void lv_user_setup(void)</code> as entry point.
             </div>
           )}
+          <LanguageSelector language={language} onChange={handleLanguageChange} />
           <div style={{ flex: 1, minHeight: 0 }}>
             <Editor value={code} language={language} onChange={setCode} />
           </div>
