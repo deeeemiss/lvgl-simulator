@@ -10,9 +10,13 @@ Think of it as **CodePen for LVGL**.
 
 ### Editor
 - **Monaco Editor** — full VS Code experience: syntax highlighting, autocomplete, multi-cursor
-- **Supports Python and C/C++** — open `.py`, `.c`, `.cpp`, `.h`, `.hpp` files; language mode switches automatically
-- **Open files** — load scripts directly into the editor via the Open button or drag-and-drop
+- **C/C++ support** — open `.c`, `.cpp`, `.h`, `.hpp` files to view and edit LVGL C code with full syntax highlighting
+- **Python support** — open `.py` files and **run** them directly via the MicroPython + LVGL WASM runtime
+- **Open files** — load scripts directly into the editor via the Open button
 - **Keyboard shortcuts** — see the full list with the keyboard icon button (⌘ on macOS, Ctrl on Windows/Linux)
+
+> **C/C++ vs Python:** C/C++ files are for viewing and editing only — the browser runtime executes MicroPython.
+> The LVGL API is nearly identical between C and Python: `lv_btn_create(scr)` → `lv.button(scr)`, `lv_obj_set_size(obj, w, h)` → `obj.set_size(w, h)`.
 
 ### Preview
 - **Live mode** — click Run to enter live mode; edits auto-run after an 800ms debounce

@@ -90,8 +90,28 @@ export default function App() {
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Editor — always visible */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <Editor value={code} language={language} onChange={setCode} />
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+          {(language === 'c' || language === 'cpp') && (
+            <div style={{
+              padding: '5px 14px',
+              background: '#7c5c0022',
+              borderBottom: `1px solid ${theme.border}`,
+              color: '#c8a84b',
+              fontSize: 11,
+              flexShrink: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              C/C++ — view & edit only. Run requires Python (MicroPython + LVGL bindings).
+            </div>
+          )}
+          <div style={{ flex: 1, minHeight: 0 }}>
+            <Editor value={code} language={language} onChange={setCode} />
+          </div>
         </div>
 
         <div style={{ width: 1, background: theme.borderSubtle, flexShrink: 0 }} />
