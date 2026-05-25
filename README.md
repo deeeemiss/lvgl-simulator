@@ -8,13 +8,39 @@ Think of it as **CodePen for LVGL**.
 
 ## Features
 
-- **Live preview** — edit code, see changes after 800ms debounce, zero setup
-- **Monaco Editor** — VS Code editor experience in the browser (syntax highlighting, autocomplete)
-- **Multiple resolutions** — 480×320, 800×480, 1280×720 (elements scale proportionally)
-- **Pop-out preview** — open the preview in a separate window and move it to a second monitor
-- **Fullscreen mode** — maintains aspect ratio, enter/exit with a button
-- **Open .py files** — load scripts directly into the editor
-- **Resizable output panel** — see `print()` output and errors, drag to resize
+### Editor
+- **Monaco Editor** — full VS Code experience: syntax highlighting, autocomplete, multi-cursor
+- **Supports Python and C/C++** — open `.py`, `.c`, `.cpp`, `.h`, `.hpp` files; language mode switches automatically
+- **Open files** — load scripts directly into the editor via the Open button or drag-and-drop
+- **Keyboard shortcuts** — see the full list with the keyboard icon button (⌘ on macOS, Ctrl on Windows/Linux)
+
+### Preview
+- **Live mode** — click Run to enter live mode; edits auto-run after an 800ms debounce
+- **Stop** — exits live mode and clears the canvas
+- **Multiple resolutions** — 480×320, 800×480, 1280×720; elements scale proportionally at higher resolutions
+- **Aspect-ratio scaling** — preview fits available space; dragging the output panel up shrinks the canvas proportionally
+- **Fullscreen** — enter/exit fullscreen from the preview controls; aspect ratio is preserved
+- **Pop-out window** — open the preview in a separate window (drag it to a second monitor); the main window switches to a two-column editor + output layout while the popup is open
+
+### UI
+- **Light / dark theme** — toggle with the ☀/🌙 button; preference persisted in localStorage (default: dark)
+- **Resizable output panel** — drag the top edge to resize; height persisted in localStorage
+- **Output panel** — shows `print()` output and runtime errors with color coding
+- **GitHub link** — icon button in the toolbar; shows ⭐ star count once the repo reaches 1000 stars
+
+### Keyboard shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl/⌘ + Enter` | Run |
+| `Ctrl/⌘ + .` | Stop |
+| `Ctrl/⌘ + /` | Toggle comment |
+| `Shift + Alt + F` | Format document |
+| `Ctrl/⌘ + D` | Select next occurrence |
+| `Alt + ↑ / ↓` | Move line up / down |
+| `Ctrl/⌘ + Shift + K` | Delete line |
+| `Ctrl/⌘ + F` | Find |
+| `Ctrl/⌘ + H` | Find & replace |
 
 ---
 
@@ -52,12 +78,15 @@ The simulator runs entirely in the browser — no backend, no server-side execut
 
 **Execution flow:**
 1. User clicks **Run** (or edits code in live mode)
-2. Runner prepends a screen reset: `lv.obj(None)` + `lv.screen_load()` to clear previous state
-3. `mp_js_do_str` executes the script, then appends `lv.tick_inc(100)` + `lv.timer_handler()` to flush display
+2. Runner prepends a screen reset (`lv.obj(None)` + `lv.screen_load()`) to clear previous state
+3. `mp_js_do_str` executes the script, then appends `lv.tick_inc(100)` + `lv.timer_handler()` to flush the display
 4. LVGL draws pixels to the canvas — visible instantly
 
 **Asyncify conflict prevention:**
 `mp_js_do_str` and `mp_handle_pending` are both asyncified — only one can be active at a time. An `executingCode` flag pauses the ticker loop during script execution.
+
+**Pop-out preview:**
+The popup window mirrors the canvas via `requestAnimationFrame` + `drawImage`. The hidden `<iframe>` stays mounted (`display: none`) so the WASM runtime keeps running while the popup is open.
 
 ---
 
@@ -114,7 +143,7 @@ label.set_text("Hello LVGL!")
 label.center()
 ```
 
-> `lv.init()` and the display driver are initialized automatically — no need to call them.
+> `lv.init()` and the display driver are initialized automatically — no need to call them manually.
 
 ---
 
