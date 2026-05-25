@@ -22,6 +22,16 @@ export default function App() {
   const autoRunTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevCodeRef = useRef<string | null>(null);
   const reenterLiveRef = useRef(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const monacoEditorRef = useRef<any>(null);
+
+  const handleGotoLine = useCallback((line: number) => {
+    const ed = monacoEditorRef.current;
+    if (!ed) return;
+    ed.revealLineInCenter(line);
+    ed.setPosition({ lineNumber: line, column: 1 });
+    ed.focus();
+  }, []);
 
   // Helper: call run with current language + resolution
   const runWithContext = useCallback((c: string) => {
@@ -133,7 +143,7 @@ export default function App() {
           )}
           <LanguageSelector language={language} onChange={handleLanguageChange} />
           <div style={{ flex: 1, minHeight: 0 }}>
-            <Editor value={code} language={language} onChange={setCode} />
+            <Editor value={code} language={language} onChange={setCode} editorRef={monacoEditorRef} />
           </div>
         </div>
 
@@ -154,12 +164,12 @@ export default function App() {
             <div style={{ padding: '8px 12px', borderBottom: `1px solid ${theme.border}`, color: theme.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, flexShrink: 0 }}>
               Output — preview in external window
             </div>
-            <StatusBar output={output} onClear={clearOutput} embedded />
+            <StatusBar output={output} onClear={clearOutput} embedded onGotoLine={handleGotoLine} />
           </div>
         )}
       </div>
 
-      {!popoutOpen && <StatusBar output={output} onClear={clearOutput} />}
+      {!popoutOpen && <StatusBar output={output} onClear={clearOutput} onGotoLine={handleGotoLine} />}
     </div>
   );
 }

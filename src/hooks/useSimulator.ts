@@ -25,6 +25,7 @@ export function useSimulator(): UseSimulatorReturn {
   const [status, setStatus] = useState<SimulatorStatus>('loading');
   const [output, setOutput] = useState<SimulatorOutput[]>([]);
   const abortRef = useRef<AbortController | null>(null);
+  const compileStartRef = useRef<number>(0);
 
   const appendOutput = useCallback((entry: SimulatorOutput) => {
     setOutput(prev => [...prev, entry]);
@@ -85,6 +86,7 @@ export function useSimulator(): UseSimulatorReturn {
       const ctrl = new AbortController();
       abortRef.current = ctrl;
 
+      compileStartRef.current = Date.now();
       flushSync(() => {
         setStatus('compiling');
         setOutput([{ type: 'info', text: `Compiling C/C++ (${width}×${height})…` }]);
@@ -101,7 +103,9 @@ export function useSimulator(): UseSimulatorReturn {
           if (!ok) throw new Error(data.error ?? 'Compilation failed');
           const id = data.id as string;
           const cached = data.cached as boolean;
+          const elapsed = Date.now() - compileStartRef.current;
           appendOutput({ type: 'info', text: cached ? 'Cache hit — loading…' : 'Compilation successful — loading…' });
+          appendOutput({ type: 'info', text: `Compiled in ${(elapsed / 1000).toFixed(1)}s${cached ? ' (cached)' : ''}` });
           // Point iframe to c-runner; it will postMessage 'status:running' on start
           const src = `/c-runner.html?id=${id}&w=${width}&h=${height}`;
           iframe.src = src;
