@@ -112,7 +112,7 @@ function emccArgsFor({ userCodePath, outJs, width, height }) {
     TEMPLATE_MAIN,
     ...(existsSync(LVGL_LIB) ? [LVGL_LIB] : lvglSourceList()),
     '-I', LVGL_DIR,
-    '-include', LV_CONF,
+    '-DLV_CONF_SKIP=1', '-include', LV_CONF,
     '-DDISP_HOR_RES=' + width,
     '-DDISP_VER_RES=' + height,
     '-s', 'USE_SDL=2',
