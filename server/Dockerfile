@@ -7,16 +7,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /
 RUN git clone --depth 1 --branch v9.2.2 https://github.com/lvgl/lvgl.git /lvgl
 
 WORKDIR /server
-COPY lv_conf.h    /server/lv_conf.h
+COPY lv_conf.h     /server/lv_conf.h
 COPY build_lvgl.sh /server/build_lvgl.sh
 RUN /server/build_lvgl.sh
 
 # Stage 2: runtime image
 FROM emscripten/emsdk:3.1.60
 
-# Copy LVGL source (headers needed at compile time) and pre-built lib
-COPY --from=lvgl-builder /lvgl   /lvgl
+# Copy LVGL source (headers) + pre-built static lib
+COPY --from=lvgl-builder /lvgl              /lvgl
 COPY --from=lvgl-builder /server/liblvgl.a /server/liblvgl.a
+
+# Copy emscripten port cache (SDL2 pre-built in stage 1 — avoids re-download at runtime)
+COPY --from=lvgl-builder /emsdk/upstream/emscripten/cache /emsdk/upstream/emscripten/cache
 
 # Install Node.js 20
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
