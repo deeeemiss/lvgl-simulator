@@ -22,7 +22,9 @@ import type { SimulatorStatus } from '../hooks/useSimulator';
 interface ToolbarProps {
   status: SimulatorStatus;
   liveMode: boolean;
+  language: string;
   resolution: Resolution;
+  canRun: boolean;
   onRun: () => void;
   onStop: () => void;
   onResolutionChange: (r: Resolution) => void;
@@ -30,19 +32,20 @@ interface ToolbarProps {
 }
 
 const STATUS_LABELS: Record<SimulatorStatus, string> = {
-  loading: 'Loading WASM…',
-  ready: 'Ready',
-  running: 'Running',
-  error: 'Error',
+  loading:    'Loading WASM…',
+  ready:      'Ready',
+  running:    'Running',
+  error:      'Error',
+  compiling:  'Compiling…',
 };
 
 const STATUS_COLORS: Record<SimulatorStatus, string> = {
-  loading: '#f0a500',
-  ready: '#4caf50',
-  running: '#2196f3',
-  error: '#f44336',
+  loading:   '#f0a500',
+  ready:     '#4caf50',
+  running:   '#2196f3',
+  error:     '#f44336',
+  compiling: '#a06be0',
 };
-
 
 const IconSun = () => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -100,30 +103,32 @@ function GitHubButton({ stars }: { stars: number | null }) {
   );
 }
 
-export function Toolbar({ status, liveMode, resolution, onRun, onStop, onResolutionChange, onFileLoad }: ToolbarProps) {
+export function Toolbar({ status, liveMode, language, resolution, canRun, onRun, onStop, onResolutionChange, onFileLoad }: ToolbarProps) {
   const { theme, toggle } = useTheme();
-  const stars   = useGitHubStars();
-  const canRun  = !liveMode && status === 'ready';
-  const canStop = liveMode;
+  const stars = useGitHubStars();
+  const canStop = liveMode || status === 'compiling' || status === 'running';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-    const language = ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'h' ? 'cpp'
-                   : ext === 'c' ? 'c'
-                   : 'python';
+    const lang = ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'h' ? 'cpp'
+               : ext === 'c' ? 'c'
+               : 'python';
     const reader = new FileReader();
     reader.onload = ev => {
       const text = ev.target?.result;
-      if (typeof text === 'string') onFileLoad(text, language);
+      if (typeof text === 'string') onFileLoad(text, lang);
     };
     reader.readAsText(file);
     e.target.value = '';
   }
 
-  const dotColor = liveMode ? '#f44336' : STATUS_COLORS[status];
+  const isCLang = language === 'c' || language === 'cpp';
+  const dotColor = status === 'compiling' ? STATUS_COLORS.compiling
+                 : liveMode              ? '#f44336'
+                 :                         STATUS_COLORS[status];
 
   return (
     <div style={{
@@ -148,7 +153,7 @@ export function Toolbar({ status, liveMode, resolution, onRun, onStop, onResolut
         style={{ display: 'none' }}
         onChange={handleFileChange}
       />
-      <button className="lvgl-btn lvgl-btn-open" onClick={() => fileInputRef.current?.click()} title="Open .py file">
+      <button className="lvgl-btn lvgl-btn-open" onClick={() => fileInputRef.current?.click()} title="Open .py / .c / .cpp file">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
@@ -156,8 +161,13 @@ export function Toolbar({ status, liveMode, resolution, onRun, onStop, onResolut
         Open
       </button>
 
-      <button className="lvgl-btn lvgl-btn-run" onClick={onRun} disabled={!canRun}>
-        ▶ Run
+      <button
+        className="lvgl-btn lvgl-btn-run"
+        onClick={onRun}
+        disabled={!canRun}
+        title={isCLang ? 'Compile & run C/C++ (server-side emscripten)' : 'Run Python (Ctrl+Enter)'}
+      >
+        {status === 'compiling' ? '⏳ Compiling…' : '▶ Run'}
       </button>
 
       <button className="lvgl-btn lvgl-btn-stop" onClick={onStop} disabled={!canStop}>
@@ -184,12 +194,12 @@ export function Toolbar({ status, liveMode, resolution, onRun, onStop, onResolut
             height: 7,
             borderRadius: '50%',
             background: dotColor,
-            boxShadow: liveMode ? '0 0 6px #f44336' : 'none',
+            boxShadow: (liveMode || status === 'compiling' || status === 'running') ? `0 0 6px ${dotColor}` : 'none',
             transition: 'background 0.2s ease, box-shadow 0.2s ease',
             flexShrink: 0,
           }} />
           <span style={{ color: dotColor, fontSize: 12, transition: 'color 0.2s ease' }}>
-            {liveMode ? 'Live' : STATUS_LABELS[status]}
+            {status === 'compiling' ? 'Compiling…' : liveMode ? 'Live' : STATUS_LABELS[status]}
           </span>
         </div>
         <button className="lvgl-icon-btn" onClick={toggle} title={theme.name === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}>

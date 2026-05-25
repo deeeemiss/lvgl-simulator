@@ -22,27 +22,34 @@ export default function App() {
   const prevCodeRef = useRef<string | null>(null);
   const reenterLiveRef = useRef(false);
 
+  // Helper: call run with current language + resolution
+  const runWithContext = useCallback((c: string) => {
+    run(c, language, resolution.width, resolution.height);
+  }, [run, language, resolution]);
+
   useEffect(() => {
     if (status === 'ready' && reenterLiveRef.current) {
       reenterLiveRef.current = false;
       setLiveMode(true);
-      run(code);
+      runWithContext(code);
     }
-  }, [status, run, code]);
+  }, [status, runWithContext, code]);
 
   useEffect(() => {
     if (prevCodeRef.current === null) { prevCodeRef.current = code; return; }
     if (prevCodeRef.current === code) return;
     prevCodeRef.current = code;
     if (!liveMode) return;
+    // Live mode only for Python (C needs explicit run)
+    if (language !== 'python') return;
     if (autoRunTimer.current) clearTimeout(autoRunTimer.current);
-    autoRunTimer.current = setTimeout(() => run(code), AUTO_RUN_DELAY);
+    autoRunTimer.current = setTimeout(() => runWithContext(code), AUTO_RUN_DELAY);
     return () => { if (autoRunTimer.current) clearTimeout(autoRunTimer.current); };
-  }, [code, run, liveMode]);
+  }, [code, runWithContext, liveMode, language]);
 
   const handleFileLoad = useCallback((text: string, lang: string) => { setCode(text); setLanguage(lang); }, []);
 
-  const handleRun = useCallback(() => { setLiveMode(true); run(code); }, [run, code]);
+  const handleRun = useCallback(() => { setLiveMode(true); runWithContext(code); }, [runWithContext, code]);
 
   const handleStop = useCallback(() => {
     setLiveMode(false);
@@ -54,19 +61,24 @@ export default function App() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!(e.ctrlKey || e.metaKey)) return;
-      if (e.key === 'Enter') { e.preventDefault(); setLiveMode(m => { if (!m) { run(code); return true; } return m; }); }
+      if (e.key === 'Enter') { e.preventDefault(); setLiveMode(m => { if (!m) { runWithContext(code); return true; } return m; }); }
       if (e.key === '.')     { e.preventDefault(); handleStop(); }
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [run, code, handleStop]);
+  }, [runWithContext, code, handleStop]);
 
   const handleResolutionChange = useCallback((r: Resolution) => {
     if (r.label === prevResolutionRef.current.label) return;
     prevResolutionRef.current = r;
-    if (liveMode) { reenterLiveRef.current = true; setLiveMode(false); }
+    if (liveMode && language === 'python') { reenterLiveRef.current = true; setLiveMode(false); }
     setResolution(r);
-  }, [liveMode]);
+  }, [liveMode, language]);
+
+  // Disable Run for C/C++ while compiling or running (must stop first)
+  const isCompiling = status === 'compiling';
+  const canRun = !liveMode && status === 'ready';
+  const canRunC  = (language === 'c' || language === 'cpp') && !isCompiling && status !== 'running';
 
   return (
     <div style={{
@@ -81,15 +93,16 @@ export default function App() {
       <Toolbar
         status={status}
         liveMode={liveMode}
+        language={language}
         resolution={resolution}
         onRun={handleRun}
         onStop={handleStop}
         onResolutionChange={handleResolutionChange}
         onFileLoad={handleFileLoad}
+        canRun={language === 'c' || language === 'cpp' ? canRunC : canRun}
       />
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Editor — always visible */}
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           {(language === 'c' || language === 'cpp') && (
             <div style={{
@@ -106,7 +119,7 @@ export default function App() {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
               </svg>
-              C/C++ — view & edit only. Run requires Python (MicroPython + LVGL bindings).
+              C/C++ — code gets compiled server-side via emscripten. Define <code style={{ fontFamily: 'monospace', background: '#fff1', padding: '0 3px', borderRadius: 2 }}>void lv_user_setup(void)</code> as entry point.
             </div>
           )}
           <div style={{ flex: 1, minHeight: 0 }}>
@@ -116,18 +129,16 @@ export default function App() {
 
         <div style={{ width: 1, background: theme.borderSubtle, flexShrink: 0 }} />
 
-        {/* Preview panel: hidden (display:none) when popout open so iframe/WASM stays alive */}
         <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: popoutOpen ? 'none' : undefined }}>
           <DisplayCanvas
             iframeRef={iframeRef}
             resolution={resolution}
-            showPlaceholder={!liveMode}
+            showPlaceholder={!liveMode && status !== 'compiling'}
             liveMode={liveMode}
             onPopoutChange={setPopoutOpen}
           />
         </div>
 
-        {/* When popped out: show StatusBar in the right panel */}
         {popoutOpen && (
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', borderLeft: `1px solid ${theme.borderSubtle}` }}>
             <div style={{ padding: '8px 12px', borderBottom: `1px solid ${theme.border}`, color: theme.textSecondary, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, flexShrink: 0 }}>
@@ -138,7 +149,6 @@ export default function App() {
         )}
       </div>
 
-      {/* StatusBar at bottom only when not in popout mode */}
       {!popoutOpen && <StatusBar output={output} onClear={clearOutput} />}
     </div>
   );

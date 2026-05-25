@@ -8,10 +8,11 @@ interface StatusBarProps {
   embedded?: boolean; // fill parent height, no drag handle, no fixed height
 }
 
-const TYPE_COLORS: Record<SimulatorOutput['type'], string> = {
+const TYPE_COLORS: Record<SimulatorOutput["type"], string> = {
   stdout: '#ccc',
   stderr: '#f0a500',
-  error: '#f44336',
+  error:  '#f44336',
+  info:   '#60a0e0',
 };
 
 const LS_KEY = 'lvgl-statusbar-height';
