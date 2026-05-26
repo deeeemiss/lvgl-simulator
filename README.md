@@ -4,6 +4,8 @@ A browser-based simulator for [LVGL](https://lvgl.io) — write LVGL code in **M
 
 Think of it as **CodePen for LVGL**.
 
+> **VS Code user?** Check out the [LVGL Simulator extension](https://github.com/deeeemiss/lvgl-simulator-vscode) — live preview for MicroPython and C/C++ directly inside VS Code, with local Emscripten compilation.
+
 ---
 
 ## Features
