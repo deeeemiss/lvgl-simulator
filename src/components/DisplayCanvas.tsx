@@ -152,7 +152,7 @@ export function DisplayCanvas({ iframeRef, resolution, cArtifactId, showPlacehol
             border: `2px solid ${theme.borderSubtle}`,
             borderRadius: 4,
             overflow: 'hidden',
-            boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+            boxShadow: theme.name === 'dark' ? '0 4px 32px rgba(0,0,0,0.6)' : '0 2px 10px rgba(0,0,0,0.18)',
             background: '#000',
           }}
         >

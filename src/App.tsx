@@ -121,9 +121,9 @@ export default function App() {
           {(language === 'cpp') && (
             <div style={{
               padding: '4px 14px',
-              background: '#7c5c0022',
+              background: theme.name === 'dark' ? '#c8a84b14' : '#c8a84b22',
               borderBottom: `1px solid ${theme.border}`,
-              color: '#c8a84b',
+              color: theme.name === 'dark' ? '#c8a84b' : '#7a6200',
               fontSize: 11,
               flexShrink: 0,
               display: 'flex',
