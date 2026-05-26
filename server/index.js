@@ -31,18 +31,18 @@ app.use((req, res, next) => {
 const ARTIFACTS_DIR = join(__dirname, '.artifacts');
 const LVGL_DIR = '/lvgl';
 const LVGL_LIB = join(__dirname, 'liblvgl.a');
-const TEMPLATE_MAIN = join(__dirname, 'template_main.c');
+const TEMPLATE_MAIN = join(__dirname, 'template_main.cpp');
 const LV_CONF = join(__dirname, 'lv_conf.h');
 
 mkdirSync(ARTIFACTS_DIR, { recursive: true });
 
-// Check emcc is available
-let emccPath = 'emcc';
+// Check em++ is available
+let emccPath = 'em++';
 try {
-  const { stdout } = await execFileAsync('which', ['emcc']);
+  const { stdout } = await execFileAsync('which', ['em++']);
   emccPath = stdout.trim();
 } catch {
-  console.warn('[warn] emcc not found in PATH — compile requests will fail');
+  console.warn('[warn] em++ not found in PATH — compile requests will fail');
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -162,7 +162,7 @@ app.post('/api/compile', async (req, res) => {
   mkdirSync(artifactDir, { recursive: true });
 
   // Write user code wrapped in a header
-  const userCodePath = join(artifactDir, 'user_code.c');
+  const userCodePath = join(artifactDir, 'user_code.cpp');
   const userCodeWrapped = `#include "lvgl.h"\n\n${code}\n`;
   writeFileSync(userCodePath, userCodeWrapped, 'utf8');
 
@@ -245,7 +245,7 @@ app.post('/api/compile-stream', async (req, res) => {
   }
 
   mkdirSync(artifactDir, { recursive: true });
-  const userCodePath = join(artifactDir, 'user_code.c');
+  const userCodePath = join(artifactDir, 'user_code.cpp');
   writeFileSync(userCodePath, `#include "lvgl.h"\n\n${code}\n`, 'utf8');
 
   send({ type: 'log', text: `[server] queued ${hash} (${width}x${height})` });
