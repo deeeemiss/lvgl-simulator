@@ -120,20 +120,23 @@ export default function App() {
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           {(language === 'cpp') && (
             <div style={{
-              padding: '5px 14px',
+              padding: '4px 14px',
               background: '#7c5c0022',
               borderBottom: `1px solid ${theme.border}`,
               color: '#c8a84b',
               fontSize: 11,
               flexShrink: 0,
               display: 'flex',
-              alignItems: 'center',
-              gap: 6,
+              flexDirection: 'column',
+              gap: 1,
             }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-              C/C++ — compiled server-side via emscripten. Define <code style={{ fontFamily: 'monospace', background: '#fff1', padding: '0 3px', borderRadius: 2 }}>void lv_user_setup(void)</code> as entry point. Each change requires a new Run — no live preview.
+              <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Compiled server-side via emscripten · entry point: <code style={{ fontFamily: 'monospace', background: '#fff1', padding: '0 3px', borderRadius: 2 }}>lv_user_setup(void)</code>
+              </span>
+              <span style={{ paddingLeft: 16, opacity: 0.8 }}>No live preview — press Run after each change.</span>
             </div>
           )}
           <LanguageSelector language={language} onChange={handleLanguageChange} />
