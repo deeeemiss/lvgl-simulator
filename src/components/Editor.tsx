@@ -14,15 +14,6 @@ lv.screen_load(scr)
 print("green rect done")
 `;
 
-const DEFAULT_CODE_C = `#include "lvgl.h"
-
-void lv_user_setup(void) {
-    lv_obj_t *label = lv_label_create(lv_screen_active());
-    lv_label_set_text(label, "Hello LVGL!");
-    lv_obj_center(label);
-}
-`;
-
 const DEFAULT_CODE_CPP = `#include "lvgl.h"
 
 extern "C" void lv_user_setup(void) {
@@ -34,7 +25,6 @@ extern "C" void lv_user_setup(void) {
 
 export const DEFAULT_CODES: Record<string, string> = {
   python: DEFAULT_CODE,
-  c:      DEFAULT_CODE_C,
   cpp:    DEFAULT_CODE_CPP,
 };
 

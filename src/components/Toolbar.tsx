@@ -75,8 +75,7 @@ export function Toolbar({ status, liveMode, language, resolution, canRun, onRun,
     const file = e.target.files?.[0];
     if (!file) return;
     const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
-    const lang = ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'h' ? 'cpp'
-               : ext === 'c' ? 'c'
+    const lang = ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'h' || ext === 'c' ? 'cpp'
                : 'python';
     const reader = new FileReader();
     reader.onload = ev => {
@@ -87,7 +86,7 @@ export function Toolbar({ status, liveMode, language, resolution, canRun, onRun,
     e.target.value = '';
   }
 
-  const isCLang = language === 'c' || language === 'cpp';
+  const isCLang = language === 'cpp';
   const dotColor = status === 'compiling' ? STATUS_COLORS.compiling
                  : liveMode              ? '#f44336'
                  :                         STATUS_COLORS[status];

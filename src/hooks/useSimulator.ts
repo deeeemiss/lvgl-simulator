@@ -77,7 +77,7 @@ export function useSimulator(): UseSimulatorReturn {
     const iframe = iframeRef.current;
     if (!iframe) return;
 
-    if (language === 'c' || language === 'cpp') {
+    if (language === 'cpp') {
       if (abortRef.current) abortRef.current.abort();
       const ctrl = new AbortController();
       abortRef.current = ctrl;

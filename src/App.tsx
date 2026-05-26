@@ -52,7 +52,7 @@ export default function App() {
     prevCodeRef.current = code;
     if (!liveMode) return;
     // Live mode only for Python (C needs explicit run)
-    if (language !== 'python') return;
+    if (language === 'cpp') return;
     if (autoRunTimer.current) clearTimeout(autoRunTimer.current);
     autoRunTimer.current = setTimeout(() => runWithContext(code), AUTO_RUN_DELAY);
     return () => { if (autoRunTimer.current) clearTimeout(autoRunTimer.current); };
@@ -97,7 +97,7 @@ export default function App() {
   // Disable Run for C/C++ while compiling or running (must stop first)
   const isCompiling = status === 'compiling';
   const canRun = !liveMode && status === 'ready';
-  const canRunC  = (language === 'c' || language === 'cpp') && !isCompiling && status !== 'running';
+  const canRunC  = (language === 'cpp') && !isCompiling && status !== 'running';
 
   return (
     <div style={{
@@ -118,12 +118,12 @@ export default function App() {
         onStop={handleStop}
         onResolutionChange={handleResolutionChange}
         onFileLoad={handleFileLoad}
-        canRun={language === 'c' || language === 'cpp' ? canRunC : canRun}
+        canRun={language === 'cpp' ? canRunC : canRun}
       />
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-          {(language === 'c' || language === 'cpp') && (
+          {(language === 'cpp') && (
             <div style={{
               padding: '5px 14px',
               background: '#7c5c0022',

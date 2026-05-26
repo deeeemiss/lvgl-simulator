@@ -7,8 +7,7 @@ interface LanguageSelectorProps {
 
 const LANGUAGES: { id: string; label: string }[] = [
   { id: 'python', label: 'Python' },
-  { id: 'c',      label: 'C'      },
-  { id: 'cpp',    label: 'C++'    },
+  { id: 'cpp',    label: 'C / C++' },
 ];
 
 export function LanguageSelector({ language, onChange }: LanguageSelectorProps) {
