@@ -18,7 +18,7 @@ Think of it as **CodePen for LVGL**.
 
 ### Preview
 - **Live mode (Python)** — click Run to enter live mode; edits auto-run after an 800ms debounce
-- **C/C++ compile & run** — click Run to compile server-side via Emscripten; output streams live during compilation
+- **C/C++ compile & run** — click Run to compile server-side via Emscripten; output streams live during compilation. No live preview — each change requires a new Run.
 - **Stop** — exits live mode and clears the canvas
 - **Multiple resolutions** — 480×320, 800×480, 1280×720; elements scale proportionally at higher resolutions
 - **Aspect-ratio scaling** — preview fits available space; dragging the output panel shrinks the canvas proportionally
@@ -85,7 +85,7 @@ Think of it as **CodePen for LVGL**.
 ┌─────────────────────┐      ┌────────────────────────────────────┐
 │   React App          │      │           Node.js Server            │
 │                     │      │                                    │
-│  Monaco Editor ─────┼─────▶│  emcc user_code.c                  │
+│  Monaco Editor ─────┼─────▶│  em++ user_code.cpp                │
 │  (C/C++ code)       │      │    + LVGL source                   │
 │                     │      │    + SDL2                          │
 │  Output panel ◀─────┼──────│  → output.js + output.wasm         │
@@ -102,7 +102,7 @@ Think of it as **CodePen for LVGL**.
 
 **Execution flow:**
 1. User clicks **Run**
-2. Code is sent to the server; Emscripten compiles it (`emcc`) with LVGL and SDL2
+2. Code is sent to the server; Emscripten compiles it (`em++`) with LVGL and SDL2 — full C++ supported (classes, templates, STL)
 3. Compiler output streams to the browser in real time via SSE
 4. On success, the server stores the JS+WASM artifact and returns an artifact ID
 5. The browser loads `c-runner.html?id=...` in a visible iframe; SDL2 renders to the iframe's canvas
@@ -110,7 +110,7 @@ Think of it as **CodePen for LVGL**.
 | Component | Role |
 |-----------|------|
 | `lv_micropython` WASM | MicroPython + LVGL runtime compiled to WebAssembly |
-| `emcc` (server) | Emscripten C/C++ compiler, builds LVGL + user code to WASM |
+| `em++` (server) | Emscripten C++ compiler, builds LVGL + user code to WASM — supports full C++ |
 | SSE streaming | Compile output is streamed line by line to the browser |
 | Artifact store | Compiled JS+WASM files stored on server with 1h TTL |
 | `c-runner.html` | Iframe page that loads the compiled artifact and renders via SDL2 |
@@ -210,6 +210,8 @@ void lv_user_setup(void) {
 ```
 
 > The display, SDL2 driver, and LVGL tick are all set up automatically. Just implement `lv_user_setup`.
+
+> **Note:** C/C++ has no live preview — press Run after each change. C++ features (classes, templates, STL) are fully supported.
 
 ---
 
