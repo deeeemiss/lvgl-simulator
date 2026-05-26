@@ -100,10 +100,11 @@ export function useSimulator(): UseSimulatorReturn {
           const id = data.id as string;
           const cached = data.cached as boolean;
           const elapsed = Date.now() - compileStartRef.current;
-          appendOutput({ type: 'info', text: cached ? 'Cache hit — loading…' : 'Compilation successful — loading…' });
-          appendOutput({ type: 'info', text: `Compiled in ${(elapsed / 1000).toFixed(1)}s${cached ? ' (cached)' : ''}` });
-          // Update React state — DisplayCanvas will set the iframe src reactively.
-          // This avoids the imperative iframe.src = ... getting clobbered by React re-renders.
+          flushSync(() => {
+            appendOutput({ type: 'info', text: cached ? 'Cache hit — loading…' : 'Compilation successful — loading…' });
+            appendOutput({ type: 'info', text: `Compiled in ${(elapsed / 1000).toFixed(1)}s${cached ? ' (cached)' : ''}` });
+            setStatus('running');
+          });
           setCArtifactId(id);
         })
         .catch(err => {

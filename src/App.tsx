@@ -70,7 +70,7 @@ export default function App() {
     setLanguage(lang);
   }, [handleStop]);
 
-  const handleRun = useCallback(() => { setLiveMode(true); runWithContext(code); }, [runWithContext, code]);
+  const handleRun = useCallback(() => { if (language !== 'cpp') setLiveMode(true); runWithContext(code); }, [runWithContext, code, language]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
