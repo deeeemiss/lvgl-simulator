@@ -14,13 +14,29 @@ lv.screen_load(scr)
 print("green rect done")
 `;
 
+const DEFAULT_CODE_CPP = `#include "lvgl.h"
+
+extern "C" void lv_user_setup(void) {
+    lv_obj_t *label = lv_label_create(lv_screen_active());
+    lv_label_set_text(label, "Hello LVGL!");
+    lv_obj_center(label);
+}
+`;
+
+export const DEFAULT_CODES: Record<string, string> = {
+  python: DEFAULT_CODE,
+  cpp:    DEFAULT_CODE_CPP,
+};
+
 interface EditorProps {
   value?: string;
   language?: string;
   onChange?: (value: string) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  editorRef?: React.MutableRefObject<any>;
 }
 
-export function Editor({ value = DEFAULT_CODE, language = 'python', onChange }: EditorProps) {
+export function Editor({ value = DEFAULT_CODE, language = 'python', onChange, editorRef }: EditorProps) {
   const { theme } = useTheme();
   return (
     <MonacoEditor
@@ -29,6 +45,9 @@ export function Editor({ value = DEFAULT_CODE, language = 'python', onChange }: 
       value={value}
       onChange={v => onChange?.(v ?? '')}
       theme={theme.monacoTheme}
+      onMount={(editor) => {
+        if (editorRef) editorRef.current = editor;
+      }}
       options={{
         fontSize: 14,
         minimap: { enabled: false },

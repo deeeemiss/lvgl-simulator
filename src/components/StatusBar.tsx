@@ -6,18 +6,23 @@ interface StatusBarProps {
   output: SimulatorOutput[];
   onClear: () => void;
   embedded?: boolean; // fill parent height, no drag handle, no fixed height
+  onGotoLine?: (line: number) => void;
 }
 
-const TYPE_COLORS: Record<SimulatorOutput['type'], string> = {
+const TYPE_COLORS: Record<SimulatorOutput["type"], string> = {
   stdout: '#ccc',
   stderr: '#f0a500',
-  error: '#f44336',
+  error:  '#f44336',
+  info:   '#60a0e0',
 };
 
 const LS_KEY = 'lvgl-statusbar-height';
 const MIN_HEIGHT = 80;
 const MAX_HEIGHT = 600;
 const DEFAULT_HEIGHT = 140;
+
+// Matches: /path/to/file.c:12:5: error: message
+const DIAGNOSTIC_RE = /(?:[\w/.\-]+):(\d+):\d+:\s*(error|warning|note):\s*(.*)/;
 
 function loadHeight(): number {
   try {
@@ -30,7 +35,60 @@ function loadHeight(): number {
   return DEFAULT_HEIGHT;
 }
 
-export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
+interface OutputLineProps {
+  entry: SimulatorOutput;
+  onGotoLine?: (line: number) => void;
+}
+
+function OutputLine({ entry, onGotoLine }: OutputLineProps) {
+  const color = TYPE_COLORS[entry.type];
+
+  // Only attempt diagnostic parsing for error/stderr lines
+  if ((entry.type === 'error' || entry.type === 'stderr') && onGotoLine) {
+    const match = entry.text.match(DIAGNOSTIC_RE);
+    if (match) {
+      const line = parseInt(match[1], 10);
+      const kind = match[2];
+      const message = match[3];
+      const handleClick = () => onGotoLine(line);
+      const handleKey = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onGotoLine(line);
+        }
+      };
+      return (
+        <div style={{ color, lineHeight: 1.6 }}>
+          {entry.type === 'error' && <span style={{ color: '#f44336' }}>Error: </span>}
+          <span
+            onClick={handleClick}
+            onKeyDown={handleKey}
+            role="button"
+            tabIndex={0}
+            title={`Jump to line ${line}`}
+            style={{
+              color: '#60a0e0',
+              textDecoration: 'underline',
+              cursor: 'pointer',
+            }}
+          >
+            line {line}
+          </span>
+          <span style={{ color }}> — {kind}: {message}</span>
+        </div>
+      );
+    }
+  }
+
+  return (
+    <div style={{ color, lineHeight: 1.6 }}>
+      {entry.type === 'error' && <span style={{ color: '#f44336' }}>Error: </span>}
+      {entry.text}
+    </div>
+  );
+}
+
+export function StatusBar({ output, onClear, embedded, onGotoLine }: StatusBarProps) {
   const { theme } = useTheme();
   const heightRef = useRef(loadHeight());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -94,10 +152,7 @@ export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
           <span style={{ color: theme.textMuted }}>No output yet. Click Run to execute your script.</span>
         ) : (
           output.map((entry, i) => (
-            <div key={i} style={{ color: TYPE_COLORS[entry.type], lineHeight: 1.6 }}>
-              {entry.type === 'error' && <span style={{ color: '#f44336' }}>Error: </span>}
-              {entry.text}
-            </div>
+            <OutputLine key={i} entry={entry} onGotoLine={onGotoLine} />
           ))
         )}
       </div>
@@ -139,10 +194,7 @@ export function StatusBar({ output, onClear, embedded }: StatusBarProps) {
           <span style={{ color: theme.textMuted }}>No output yet. Click Run to execute your script.</span>
         ) : (
           output.map((entry, i) => (
-            <div key={i} style={{ color: TYPE_COLORS[entry.type], lineHeight: 1.6 }}>
-              {entry.type === 'error' && <span style={{ color: '#f44336' }}>Error: </span>}
-              {entry.text}
-            </div>
+            <OutputLine key={i} entry={entry} onGotoLine={onGotoLine} />
           ))
         )}
       </div>

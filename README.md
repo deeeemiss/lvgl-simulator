@@ -30,7 +30,6 @@ Think of it as **CodePen for LVGL**.
 - **Light / dark theme** — toggle with the ☀/🌙 button; preference persisted in localStorage (default: dark)
 - **Resizable output panel** — drag the top edge to resize; height persisted in localStorage
 - **Output panel** — shows `print()` output and runtime errors with color coding
-- **GitHub link** — icon button in the toolbar; shows ⭐ star count once the repo reaches 1000 stars
 
 ### Keyboard shortcuts
 

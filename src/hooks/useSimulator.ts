@@ -1,10 +1,10 @@
 import { useRef, useState, useCallback, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 
-export type SimulatorStatus = 'loading' | 'ready' | 'running' | 'error';
+export type SimulatorStatus = 'loading' | 'ready' | 'running' | 'error' | 'compiling';
 
 export interface SimulatorOutput {
-  type: 'stdout' | 'stderr' | 'error';
+  type: 'stdout' | 'stderr' | 'error' | 'info';
   text: string;
 }
 
@@ -12,7 +12,9 @@ interface UseSimulatorReturn {
   status: SimulatorStatus;
   output: SimulatorOutput[];
   iframeRef: React.RefObject<HTMLIFrameElement | null>;
-  run: (code: string) => void;
+  /** When set, DisplayCanvas should load c-runner.html with this artifact id */
+  cArtifactId: string | null;
+  run: (code: string, language?: string, width?: number, height?: number) => void;
   stop: () => void;
   clearOutput: () => void;
 }
@@ -21,6 +23,9 @@ export function useSimulator(): UseSimulatorReturn {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [status, setStatus] = useState<SimulatorStatus>('loading');
   const [output, setOutput] = useState<SimulatorOutput[]>([]);
+  const [cArtifactId, setCArtifactId] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const compileStartRef = useRef<number>(0);
 
   const appendOutput = useCallback((entry: SimulatorOutput) => {
     setOutput(prev => [...prev, entry]);
@@ -38,10 +43,6 @@ export function useSimulator(): UseSimulatorReturn {
       if (!event.data) return;
       const { type } = event.data;
       if (type === 'ready') {
-        // flushSync: React 18 auto-batches cross-frame postMessages.
-        // Without this, 'running' and 'ready' collapse into one render
-        // and the button state never visually shows 'running'.
-        // Clear output to hide the MicroPython REPL banner printed during init.
         flushSync(() => { setStatus('ready'); setOutput([]); });
       } else if (type === 'status') {
         flushSync(() => setStatus(event.data.status as SimulatorStatus));
@@ -52,6 +53,10 @@ export function useSimulator(): UseSimulatorReturn {
         });
       } else if (type === 'print') {
         appendOutput({ type: 'stdout', text: event.data.text });
+      } else if (type === 'stdout') {
+        appendOutput({ type: 'stdout', text: event.data.text });
+      } else if (type === 'stderr') {
+        appendOutput({ type: 'stderr', text: event.data.text });
       }
     }
 
@@ -63,27 +68,75 @@ export function useSimulator(): UseSimulatorReturn {
     };
   }, [appendOutput]);
 
-  const run = useCallback((code: string) => {
+  const run = useCallback((
+    code: string,
+    language = 'python',
+    width = 480,
+    height = 320,
+  ) => {
     const iframe = iframeRef.current;
-    if (!iframe?.contentWindow) return;
-    iframe.contentWindow.postMessage({ type: 'run', code }, '*');
-  }, []);
+    if (!iframe) return;
+
+    if (language === 'cpp') {
+      if (abortRef.current) abortRef.current.abort();
+      const ctrl = new AbortController();
+      abortRef.current = ctrl;
+
+      compileStartRef.current = Date.now();
+      flushSync(() => {
+        setStatus('compiling');
+        setOutput([{ type: 'info', text: `Compiling C/C++ (${width}×${height})…` }]);
+      });
+
+      fetch('/api/compile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, width, height }),
+        signal: ctrl.signal,
+      })
+        .then(resp => resp.json().then(data => ({ ok: resp.ok, data })))
+        .then(({ ok, data }) => {
+          if (!ok) throw new Error(data.error ?? 'Compilation failed');
+          const id = data.id as string;
+          const cached = data.cached as boolean;
+          const elapsed = Date.now() - compileStartRef.current;
+          appendOutput({ type: 'info', text: cached ? 'Cache hit — loading…' : 'Compilation successful — loading…' });
+          appendOutput({ type: 'info', text: `Compiled in ${(elapsed / 1000).toFixed(1)}s${cached ? ' (cached)' : ''}` });
+          // Update React state — DisplayCanvas will set the iframe src reactively.
+          // This avoids the imperative iframe.src = ... getting clobbered by React re-renders.
+          setCArtifactId(id);
+        })
+        .catch(err => {
+          if (err.name === 'AbortError') return;
+          const msg = String(err.message || err);
+          flushSync(() => {
+            appendOutput({ type: 'error', text: msg });
+            setStatus('error');
+          });
+        });
+    } else {
+      if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
+      if (!iframe.contentWindow) return;
+      iframe.contentWindow.postMessage({ type: 'run', code }, '*');
+    }
+  }, [appendOutput]);
 
   const stop = useCallback(() => {
+    if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
     const iframe = iframeRef.current;
     if (!iframe) return;
     flushSync(() => {
       setStatus('loading');
+      setCArtifactId(null); // revert to python runner
       setOutput([]);
     });
+    // Force micropython iframe to reload by bouncing src
     const src = iframe.src;
     iframe.src = '';
-    setTimeout(() => {
-      if (iframeRef.current) iframeRef.current.src = src;
-    }, 50);
+    setTimeout(() => { if (iframeRef.current) iframeRef.current.src = src; }, 50);
   }, []);
 
   const clearOutput = useCallback(() => setOutput([]), []);
 
-  return { status, output, iframeRef, run, stop, clearOutput };
+  return { status, output, iframeRef, cArtifactId, run, stop, clearOutput };
 }
