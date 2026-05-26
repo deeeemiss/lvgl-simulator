@@ -92,7 +92,7 @@ export default function App() {
   // Disable Run for C/C++ while compiling or running (must stop first)
   const isCompiling = status === 'compiling';
   const canRun = !liveMode && status === 'ready';
-  const canRunC  = (language === 'cpp') && !isCompiling && status !== 'running';
+  const canRunC  = (language === 'cpp') && !isCompiling;
 
   return (
     <div style={{
