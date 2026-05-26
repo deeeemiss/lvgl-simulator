@@ -149,7 +149,7 @@ export function DisplayCanvas({ iframeRef, resolution, cArtifactId, showPlacehol
             position: 'relative',
             width: `min(100%, calc(${aspectRatio.toFixed(6)} * 100cqh))`,
             aspectRatio: `${resolution.width} / ${resolution.height}`,
-            border: `2px solid ${theme.borderSubtle}`,
+            border: `2px solid ${theme.name === 'dark' ? theme.borderSubtle : '#a0a0a8'}`,
             borderRadius: 4,
             overflow: 'hidden',
 
