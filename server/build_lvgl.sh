@@ -22,7 +22,7 @@ mapfile -t SOURCES < <(find "${LVGL_DIR}/src" -name '*.c' \
 
 echo "[build_lvgl] ${#SOURCES[@]} source files found."
 
-CFLAGS="-I\${LVGL_DIR} -DLV_CONF_SKIP=1 -include \${CONF} -O2 -s USE_SDL=2"
+CFLAGS="-I${LVGL_DIR} -DLV_CONF_SKIP=1 -include ${CONF} -O2 -s USE_SDL=2"
 
 for src in "${SOURCES[@]}"; do
     # Create a unique object file name based on full path
