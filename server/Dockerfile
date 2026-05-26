@@ -32,7 +32,7 @@ COPY package.json      /server/package.json
 RUN npm install --production
 
 COPY index.js          /server/index.js
-COPY template_main.c   /server/template_main.c
+COPY template_main.cpp /server/template_main.cpp
 COPY lv_conf.h         /server/lv_conf.h
 
 EXPOSE 3001
