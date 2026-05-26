@@ -21,7 +21,6 @@ export default function App() {
   const prevResolutionRef = useRef(resolution);
   const autoRunTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevCodeRef = useRef<string | null>(null);
-  const reenterLiveRef = useRef(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const monacoEditorRef = useRef<any>(null);
 
@@ -38,13 +37,11 @@ export default function App() {
     run(c, language, resolution.width, resolution.height);
   }, [run, language, resolution]);
 
-  useEffect(() => {
-    if (status === 'ready' && reenterLiveRef.current) {
-      reenterLiveRef.current = false;
-      setLiveMode(true);
-      runWithContext(code);
-    }
-  }, [status, runWithContext, code]);
+  const handleStop = useCallback(() => {
+    setLiveMode(false);
+    if (autoRunTimer.current) clearTimeout(autoRunTimer.current);
+    stop();
+  }, [stop]);
 
   useEffect(() => {
     if (prevCodeRef.current === null) { prevCodeRef.current = code; return; }
@@ -58,24 +55,22 @@ export default function App() {
     return () => { if (autoRunTimer.current) clearTimeout(autoRunTimer.current); };
   }, [code, runWithContext, liveMode, language]);
 
-  const handleFileLoad = useCallback((text: string, lang: string) => { setCode(text); setLanguage(lang); }, []);
+  const handleFileLoad = useCallback((text: string, lang: string) => {
+    handleStop();
+    setCode(text);
+    setLanguage(lang);
+  }, [handleStop]);
 
   const handleLanguageChange = useCallback((lang: string) => {
+    handleStop();
     setCode(prev => {
       const isDefault = Object.values(DEFAULT_CODES).some(d => d === prev);
       return isDefault ? (DEFAULT_CODES[lang] ?? prev) : prev;
     });
     setLanguage(lang);
-  }, []);
+  }, [handleStop]);
 
   const handleRun = useCallback(() => { setLiveMode(true); runWithContext(code); }, [runWithContext, code]);
-
-  const handleStop = useCallback(() => {
-    setLiveMode(false);
-    reenterLiveRef.current = false;
-    if (autoRunTimer.current) clearTimeout(autoRunTimer.current);
-    stop();
-  }, [stop]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -90,9 +85,9 @@ export default function App() {
   const handleResolutionChange = useCallback((r: Resolution) => {
     if (r.label === prevResolutionRef.current.label) return;
     prevResolutionRef.current = r;
-    if (liveMode && language === 'python') { reenterLiveRef.current = true; setLiveMode(false); }
+    handleStop();
     setResolution(r);
-  }, [liveMode, language]);
+  }, [handleStop]);
 
   // Disable Run for C/C++ while compiling or running (must stop first)
   const isCompiling = status === 'compiling';
