@@ -22,17 +22,34 @@
       } catch(e) {}
     }
 
+    // Forward uncaught JS errors to the parent output panel
+    window.onerror = function(msg, src, line, col, err) {
+      notifyParent('stderr', { text: '[js] ' + msg + (src ? ' ' + src + ':' + line : '') });
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      notifyParent('stderr', { text: '[js] Unhandled rejection: ' + (e.reason || e) });
+    });
+
     if (!id) {
       notifyParent('error', { message: 'c-runner: no artifact id' });
     } else {
+      var canvas = document.getElementById('canvas');
+
       window.Module = {
+        canvas: canvas,                          // SDL2/EGL uses this canvas
         print:    function(text) { notifyParent('stdout', { text: text }); },
         printErr: function(text) { notifyParent('stderr', { text: text }); },
+        onAbort: function(what) {
+          notifyParent('stderr', { text: '[abort] ' + what });
+        },
         quit: function(status) {
-          if (status !== 0) {
-            notifyParent('error', { message: 'Program exited with status ' + status });
-            notifyParent('status', { status: 'error' });
-          }
+          notifyParent(status !== 0
+            ? 'error'
+            : 'stdout',
+            status !== 0
+              ? { message: 'Program exited with status ' + status }
+              : { text: 'Program exited normally' });
+          if (status !== 0) notifyParent('status', { status: 'error' });
         },
       };
 
