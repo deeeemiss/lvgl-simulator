@@ -86,6 +86,7 @@ export function useSimulator(): UseSimulatorReturn {
       flushSync(() => {
         setStatus('compiling');
         setOutput(prev => [
+          ...prev,
           ...(prev.length > 0 ? [{ type: 'separator' as const, text: '' }] : []),
           { type: 'info', text: `Compiling C/C++ (${width}×${height})…` },
         ]);
