@@ -88,33 +88,65 @@ export function useSimulator(): UseSimulatorReturn {
         setOutput([{ type: 'info', text: `Compiling C/C++ (${width}×${height})…` }]);
       });
 
-      fetch('/api/compile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code, width, height }),
-        signal: ctrl.signal,
-      })
-        .then(resp => resp.json().then(data => ({ ok: resp.ok, data })))
-        .then(({ ok, data }) => {
-          if (!ok) throw new Error(data.error ?? 'Compilation failed');
-          const id = data.id as string;
-          const cached = data.cached as boolean;
-          const elapsed = Date.now() - compileStartRef.current;
-          flushSync(() => {
-            appendOutput({ type: 'info', text: cached ? 'Cache hit — loading…' : 'Compilation successful — loading…' });
-            appendOutput({ type: 'info', text: `Compiled in ${(elapsed / 1000).toFixed(1)}s${cached ? ' (cached)' : ''}` });
-            setStatus('running');
+      (async () => {
+        try {
+          const resp = await fetch('/api/compile-stream', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code, width, height }),
+            signal: ctrl.signal,
           });
-          setCArtifactId(id);
-        })
-        .catch(err => {
-          if (err.name === 'AbortError') return;
-          const msg = String(err.message || err);
+
+          if (!resp.ok || !resp.body) {
+            const data = await resp.json().catch(() => ({}));
+            throw new Error((data as { error?: string }).error ?? 'Compilation failed');
+          }
+
+          const reader = resp.body.getReader();
+          const decoder = new TextDecoder();
+          let buf = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, { stream: true });
+            const lines = buf.split('\n');
+            buf = lines.pop() ?? '';
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const msg = JSON.parse(line.slice(6)) as {
+                type: string; text?: string; id?: string;
+                success?: boolean; error?: string; elapsed?: string; cached?: boolean;
+              };
+              if (msg.type === 'log' && msg.text) {
+                const isError = /:\s*(fatal )?error:/.test(msg.text);
+                appendOutput({ type: isError ? 'stderr' : 'info', text: msg.text });
+              } else if (msg.type === 'done') {
+                if (msg.success && msg.id) {
+                  const elapsed = ((Date.now() - compileStartRef.current) / 1000).toFixed(1);
+                  flushSync(() => {
+                    appendOutput({ type: 'info', text: msg.cached ? `Cache hit — loading… (${elapsed}s)` : `Compilation successful — loading… (${elapsed}s)` });
+                    setStatus('running');
+                  });
+                  setCArtifactId(msg.id);
+                } else {
+                  flushSync(() => {
+                    appendOutput({ type: 'error', text: msg.error ?? 'Compilation failed' });
+                    setStatus('error');
+                  });
+                }
+              }
+            }
+          }
+        } catch (err: unknown) {
+          if (err instanceof Error && err.name === 'AbortError') return;
+          const msg = err instanceof Error ? err.message : String(err);
           flushSync(() => {
             appendOutput({ type: 'error', text: msg });
             setStatus('error');
           });
-        });
+        }
+      })();
     } else {
       if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
       if (!iframe.contentWindow) return;
