@@ -68,7 +68,9 @@ function GitHubButton() {
 
 export function Toolbar({ status, liveMode, language, resolution, canRun, onRun, onStop, onResolutionChange, onFileLoad }: ToolbarProps) {
   const { theme, toggle } = useTheme();
-  const canStop = liveMode || status === 'compiling' || status === 'running';
+  const canStop = language === 'cpp'
+    ? status === 'compiling'
+    : liveMode || status === 'compiling' || status === 'running';
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
