@@ -9,13 +9,21 @@ interface StatusBarProps {
   onGotoLine?: (line: number) => void;
 }
 
-const TYPE_COLORS: Record<SimulatorOutput["type"], string> = {
-  stdout:    '#ccc',
-  stderr:    '#f0a500',
-  error:     '#f44336',
-  info:      '#60a0e0',
-  separator: 'transparent',
-};
+function typeColors(isDark: boolean): Record<SimulatorOutput["type"], string> {
+  return isDark ? {
+    stdout:    '#ccc',
+    stderr:    '#f0a500',
+    error:     '#f44336',
+    info:      '#60a0e0',
+    separator: 'transparent',
+  } : {
+    stdout:    '#1a1a1a',
+    stderr:    '#8a5f00',
+    error:     '#c62828',
+    info:      '#1a6abf',
+    separator: 'transparent',
+  };
+}
 
 const LS_KEY = 'lvgl-statusbar-height';
 const MIN_HEIGHT = 80;
@@ -42,11 +50,15 @@ interface OutputLineProps {
 }
 
 function OutputLine({ entry, onGotoLine }: OutputLineProps) {
+  const { theme } = useTheme();
+  const isDark = theme.name === 'dark';
+  const colors = typeColors(isDark);
+
   if (entry.type === 'separator') {
-    return <div style={{ borderTop: '1px solid #333', margin: '4px 0', opacity: 0.5 }} />;
+    return <div style={{ borderTop: `1px solid ${theme.border}`, margin: '4px 0', opacity: 0.5 }} />;
   }
 
-  const color = TYPE_COLORS[entry.type];
+  const color = colors[entry.type];
 
   // Only attempt diagnostic parsing for error/stderr lines
   if ((entry.type === 'error' || entry.type === 'stderr') && onGotoLine) {
@@ -64,7 +76,7 @@ function OutputLine({ entry, onGotoLine }: OutputLineProps) {
       };
       return (
         <div style={{ color, lineHeight: 1.6 }}>
-          {entry.type === 'error' && <span style={{ color: '#f44336' }}>Error: </span>}
+          {entry.type === 'error' && <span style={{ color: colors['error'] }}>Error: </span>}
           <span
             onClick={handleClick}
             onKeyDown={handleKey}
@@ -72,7 +84,7 @@ function OutputLine({ entry, onGotoLine }: OutputLineProps) {
             tabIndex={0}
             title={`Jump to line ${line}`}
             style={{
-              color: '#60a0e0',
+              color: colors['info'],
               textDecoration: 'underline',
               cursor: 'pointer',
             }}
@@ -87,7 +99,7 @@ function OutputLine({ entry, onGotoLine }: OutputLineProps) {
 
   return (
     <div style={{ color, lineHeight: 1.6 }}>
-      {entry.type === 'error' && <span style={{ color: '#f44336' }}>Error: </span>}
+      {entry.type === 'error' && <span style={{ color: colors['error'] }}>Error: </span>}
       {entry.text}
     </div>
   );
@@ -132,7 +144,7 @@ export function StatusBar({ output, onClear, embedded, onGotoLine }: StatusBarPr
 
   if (embedded) {
     return (
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: '#0d0d0d' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', background: theme.bgStatusbar }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',
