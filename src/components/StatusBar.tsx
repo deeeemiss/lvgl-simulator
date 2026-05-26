@@ -10,10 +10,11 @@ interface StatusBarProps {
 }
 
 const TYPE_COLORS: Record<SimulatorOutput["type"], string> = {
-  stdout: '#ccc',
-  stderr: '#f0a500',
-  error:  '#f44336',
-  info:   '#60a0e0',
+  stdout:    '#ccc',
+  stderr:    '#f0a500',
+  error:     '#f44336',
+  info:      '#60a0e0',
+  separator: 'transparent',
 };
 
 const LS_KEY = 'lvgl-statusbar-height';
@@ -41,6 +42,10 @@ interface OutputLineProps {
 }
 
 function OutputLine({ entry, onGotoLine }: OutputLineProps) {
+  if (entry.type === 'separator') {
+    return <div style={{ borderTop: '1px solid #333', margin: '4px 0', opacity: 0.5 }} />;
+  }
+
   const color = TYPE_COLORS[entry.type];
 
   // Only attempt diagnostic parsing for error/stderr lines

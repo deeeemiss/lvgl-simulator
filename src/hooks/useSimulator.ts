@@ -4,7 +4,7 @@ import { flushSync } from 'react-dom';
 export type SimulatorStatus = 'loading' | 'ready' | 'running' | 'error' | 'compiling';
 
 export interface SimulatorOutput {
-  type: 'stdout' | 'stderr' | 'error' | 'info';
+  type: 'stdout' | 'stderr' | 'error' | 'info' | 'separator';
   text: string;
 }
 
@@ -43,7 +43,7 @@ export function useSimulator(): UseSimulatorReturn {
       if (!event.data) return;
       const { type } = event.data;
       if (type === 'ready') {
-        flushSync(() => { setStatus('ready'); setOutput([]); });
+        flushSync(() => setStatus('ready'));
       } else if (type === 'status') {
         flushSync(() => setStatus(event.data.status as SimulatorStatus));
       } else if (type === 'error') {
@@ -85,7 +85,10 @@ export function useSimulator(): UseSimulatorReturn {
       compileStartRef.current = Date.now();
       flushSync(() => {
         setStatus('compiling');
-        setOutput([{ type: 'info', text: `Compiling C/C++ (${width}×${height})…` }]);
+        setOutput(prev => [
+          ...(prev.length > 0 ? [{ type: 'separator' as const, text: '' }] : []),
+          { type: 'info', text: `Compiling C/C++ (${width}×${height})…` },
+        ]);
       });
 
       (async () => {
@@ -150,6 +153,7 @@ export function useSimulator(): UseSimulatorReturn {
     } else {
       if (abortRef.current) { abortRef.current.abort(); abortRef.current = null; }
       if (!iframe.contentWindow) return;
+      setOutput(prev => prev.length > 0 ? [...prev, { type: 'separator' as const, text: '' }] : prev);
       iframe.contentWindow.postMessage({ type: 'run', code }, '*');
     }
   }, [appendOutput]);
