@@ -21,6 +21,7 @@ export default function App() {
   const prevResolutionRef = useRef(resolution);
   const autoRunTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const prevCodeRef = useRef<string | null>(null);
+  const pendingRerunRef = useRef<{ code: string; lang: string; w: number; h: number } | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const monacoEditorRef = useRef<any>(null);
 
@@ -72,6 +73,16 @@ export default function App() {
 
   const handleRun = useCallback(() => { if (language !== 'cpp') setLiveMode(true); runWithContext(code); }, [runWithContext, code, language]);
 
+  // After resolution change in Python live mode, re-run when iframe signals ready
+  useEffect(() => {
+    if (status === 'ready' && pendingRerunRef.current) {
+      const { code: c, lang, w, h } = pendingRerunRef.current;
+      pendingRerunRef.current = null;
+      setLiveMode(true);
+      run(c, lang, w, h);
+    }
+  }, [status, run]);
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!(e.ctrlKey || e.metaKey)) return;
@@ -85,9 +96,13 @@ export default function App() {
   const handleResolutionChange = useCallback((r: Resolution) => {
     if (r.label === prevResolutionRef.current.label) return;
     prevResolutionRef.current = r;
+    // In Python live mode, queue a rerun at the new resolution after iframe reloads
+    if (language === 'python' && liveMode) {
+      pendingRerunRef.current = { code, lang: language, w: r.width, h: r.height };
+    }
     handleStop();
     setResolution(r);
-  }, [handleStop]);
+  }, [handleStop, language, liveMode, code]);
 
   // Disable Run for C/C++ while compiling or running (must stop first)
   const isCompiling = status === 'compiling';
