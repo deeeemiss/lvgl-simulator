@@ -186,26 +186,24 @@ export function DisplayCanvas({ iframeRef, resolution, cArtifactId, showPlacehol
         </div>
       </div>
 
-      {/* Controls — always on dark background, never overlapping canvas */}
-      {liveMode && (
-        <div style={{ flex: '0 0 auto', display: 'flex', gap: 8 }}>
-          <button
-            className="lvgl-preview-btn"
-            onClick={handlePopout}
-            title="Open preview in a separate window (drag to second monitor)"
-          >
-            <IconPopout /> Pop out
-          </button>
-          <button
-            className="lvgl-preview-btn"
-            onClick={handleFullscreen}
-            title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen preview'}
-          >
-            {isFullscreen ? <IconCompress /> : <IconFullscreen />}
-            {isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-          </button>
-        </div>
-      )}
+      {/* Controls — always rendered to avoid layout shift when liveMode changes */}
+      <div style={{ flex: '0 0 auto', display: 'flex', gap: 8, visibility: liveMode ? 'visible' : 'hidden' }}>
+        <button
+          className="lvgl-preview-btn"
+          onClick={handlePopout}
+          title="Open preview in a separate window (drag to second monitor)"
+        >
+          <IconPopout /> Pop out
+        </button>
+        <button
+          className="lvgl-preview-btn"
+          onClick={handleFullscreen}
+          title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen preview'}
+        >
+          {isFullscreen ? <IconCompress /> : <IconFullscreen />}
+          {isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+        </button>
+      </div>
 
 
     </div>
