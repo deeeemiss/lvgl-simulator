@@ -2,7 +2,7 @@
 
 # LVGL Simulator
 
-**Write LVGL code. See it run. No install required.**
+**Write LVGL code. See it run.**
 
 MicroPython in the browser, instantly. C/C++ when running locally.
 
