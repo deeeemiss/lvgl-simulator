@@ -75,7 +75,7 @@ export default function App() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (!(e.ctrlKey || e.metaKey)) return;
-      if (e.key === 'Enter') { e.preventDefault(); setLiveMode(m => { if (!m) { runWithContext(code); return true; } return m; }); }
+      if (e.key === 'Enter' || e.key === 's') { e.preventDefault(); setLiveMode(m => { if (!m) { runWithContext(code); return true; } return m; }); }
       if (e.key === '.')     { e.preventDefault(); handleStop(); }
     }
     window.addEventListener('keydown', onKeyDown);

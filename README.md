@@ -45,7 +45,7 @@ MicroPython in the browser, instantly. C/C++ when running locally.
 
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl/⌘ + Enter` | Run |
+| `Ctrl/⌘ + Enter` or `Ctrl/⌘ + S` | Run |
 | `Ctrl/⌘ + .` | Stop |
 | `Ctrl/⌘ + /` | Toggle comment |
 | `Shift + Alt + F` | Format document |

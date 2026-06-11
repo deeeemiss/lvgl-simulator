@@ -6,7 +6,7 @@ const MOD = IS_MAC ? '⌘' : 'Ctrl';
 
 const SHORTCUTS = [
   { section: 'App' },
-  { keys: [MOD, 'Enter'], label: 'Run' },
+  { keys: [MOD, 'Enter / S'], label: 'Run' },
   { keys: [MOD, '.'],     label: 'Stop' },
   { section: 'Editor' },
   { keys: [MOD, '/'],            label: 'Toggle comment' },
