@@ -9,6 +9,7 @@ MicroPython in the browser, instantly. C/C++ when running locally.
 [![Live](https://img.shields.io/badge/try%20it-lvglsim.dev-blue?style=flat-square)](https://lvglsim.dev)
 [![LVGL](https://img.shields.io/badge/LVGL-v9.2.2-brightgreen?style=flat-square)](https://lvgl.io)
 [![License](https://img.shields.io/badge/license-MIT-grey?style=flat-square)](LICENSE)
+[![GitHub](https://img.shields.io/badge/GitHub-deeeemiss%2Flvgl--simulator-181717?style=flat-square&logo=github)](https://github.com/deeeemiss/lvgl-simulator)
 [![Python](https://img.shields.io/badge/Python-MicroPython-yellow?style=flat-square)]()
 [![C/C++](https://img.shields.io/badge/C%2FC%2B%2B-Emscripten-orange?style=flat-square)]()
 

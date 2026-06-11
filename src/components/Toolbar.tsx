@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 
-const GITHUB_URL = 'https://github.com/deeeemiss/lvgl-web-simulator';
+const GITHUB_URL = 'https://github.com/deeeemiss/lvgl-simulator';
 import { RESOLUTIONS } from './DisplayCanvas';
 import { useTheme } from '../ThemeContext';
 import { ShortcutsModal } from './ShortcutsModal';
