@@ -5,13 +5,19 @@ const DEFAULT_CODE = `import lvgl as lv
 
 scr = lv.screen_active()
 
-rect = lv.obj(scr)
-rect.set_size(100, 100)
-rect.set_pos(20, 20)
-rect.set_style_bg_color(lv.color_hex(0x00FF00), 0)
+# Container — size fits content automatically
+box = lv.obj(scr)
+box.set_style_bg_color(lv.color_hex(0x3B82F6), 0)  # blue
+box.set_style_border_width(0, 0)
+box.set_style_pad_all(16, 0)
+box.set_size(lv.SIZE_CONTENT, lv.SIZE_CONTENT)
+box.center()
+
+label = lv.label(box)
+label.set_text("Hello LVGL Simulator")
+label.set_style_text_color(lv.color_hex(0xFFFFFF), 0)
 
 lv.screen_load(scr)
-print("green rect done")
 `;
 
 const DEFAULT_CODE_CPP = `#include "lvgl.h"
