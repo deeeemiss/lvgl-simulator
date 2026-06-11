@@ -73,15 +73,20 @@ export default function App() {
 
   const handleRun = useCallback(() => { if (language !== 'cpp') setLiveMode(true); runWithContext(code); }, [runWithContext, code, language]);
 
-  // After resolution change in Python live mode, re-run when iframe signals ready
+  // After resolution change in Python live mode, re-run when iframe signals ready.
+  // Listen to postMessage directly so we trigger on every fresh 'ready' (status alone may not change).
   useEffect(() => {
-    if (status === 'ready' && pendingRerunRef.current) {
+    function onMsg(e: MessageEvent) {
+      if (e?.data?.type !== 'ready') return;
+      if (!pendingRerunRef.current) return;
       const { code: c, lang, w, h } = pendingRerunRef.current;
       pendingRerunRef.current = null;
       setLiveMode(true);
       run(c, lang, w, h);
     }
-  }, [status, run]);
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [run]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -96,12 +101,15 @@ export default function App() {
   const handleResolutionChange = useCallback((r: Resolution) => {
     if (r.label === prevResolutionRef.current.label) return;
     prevResolutionRef.current = r;
-    // In Python live mode, queue a rerun at the new resolution after iframe reloads
     if (language === 'python' && liveMode) {
+      // Queue a rerun at the new resolution. React will update the iframe src
+      // (derived from resolution) → new runner loads → 'ready' fires → rerun executes.
       pendingRerunRef.current = { code, lang: language, w: r.width, h: r.height };
+      setResolution(r);
+    } else {
+      handleStop();
+      setResolution(r);
     }
-    handleStop();
-    setResolution(r);
   }, [handleStop, language, liveMode, code]);
 
   // Disable Run for C/C++ while compiling or running (must stop first)
