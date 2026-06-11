@@ -94,7 +94,7 @@ export function Toolbar({ status, liveMode, language, resolution, canRun, onRun,
                  :                         STATUS_COLORS[status];
 
   return (
-    <div style={{
+    <div className="lvgl-toolbar" style={{
       display: 'flex',
       alignItems: 'center',
       gap: 8,
@@ -103,7 +103,7 @@ export function Toolbar({ status, liveMode, language, resolution, canRun, onRun,
       borderBottom: `1px solid ${theme.border}`,
       minHeight: 44,
     }}>
-      <span style={{ color: theme.textPrimary, fontWeight: 600, fontSize: 14, marginRight: 4 }}>
+      <span className="lvgl-toolbar-title" style={{ color: theme.textPrimary, fontWeight: 600, fontSize: 14, marginRight: 4 }}>
         LVGL Simulator
       </span>
 

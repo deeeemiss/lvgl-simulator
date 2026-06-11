@@ -3,6 +3,28 @@ body, html, #root {
   margin: 0; padding: 0; height: 100%; overflow: hidden;
 }
 
+/* iOS safe-area: pad the app shell so content doesn't sit under notch / home indicator */
+#root {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* ── Mobile layout ───────────────────────────────────────────── */
+@media (max-width: 720px) {
+  /* Split editor | preview becomes stacked editor / preview */
+  .lvgl-split { flex-direction: column !important; }
+  .lvgl-split > div[style*="width: 1px"] { width: 100% !important; height: 1px !important; }
+
+  /* Local-only badge: hidden on mobile (tooltip still works) */
+  .lvgl-locallocalbadge { display: none !important; }
+
+  /* Toolbar wraps onto multiple lines */
+  .lvgl-toolbar { flex-wrap: wrap !important; row-gap: 6px !important; padding: 8px !important; }
+  .lvgl-toolbar-title { display: none !important; }
+}
+
 /* ── CSS custom properties ───────────────────────────────────── */
 :root {
   --bg-surface:       #252525;

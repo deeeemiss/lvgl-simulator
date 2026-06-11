@@ -72,7 +72,7 @@ export function LanguageSelector({ language, onChange, disabledLangs = [] }: Lan
           >
             {lang.label}
             {disabled && (
-              <span style={{
+              <span className="lvgl-locallocalbadge" style={{
                 fontSize: 9,
                 fontWeight: 600,
                 letterSpacing: '0.03em',

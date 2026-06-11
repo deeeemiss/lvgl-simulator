@@ -139,7 +139,7 @@ export default function App() {
         canRun={language === 'cpp' ? canRunC : canRun}
       />
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div className="lvgl-split" style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
           {(language === 'cpp') && (
             <div style={{
