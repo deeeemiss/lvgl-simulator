@@ -139,13 +139,21 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ### With C/C++ compilation server
 
+C/C++ compilation runs in a separate Docker container. You need two processes running simultaneously:
+
+**Terminal 1 — start the compilation server:**
 ```bash
-cd server && docker-compose up --build
-# in another terminal:
-npm install && npm run dev
+cd server
+docker-compose up --build
 ```
 
-Vite proxies `/api/*` → `http://localhost:3001`.
+**Terminal 2 — start the frontend:**
+```bash
+npm install
+npm run dev
+```
+
+The frontend runs on `localhost:5173`. When it calls `/api/compile-stream`, Vite automatically forwards that request to the compilation server on `localhost:3001` — no manual configuration needed.
 
 ### Build
 
