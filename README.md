@@ -4,7 +4,7 @@
 
 **Write LVGL code. See it run. No install required.**
 
-MicroPython and C/C++ — in the browser, instantly.
+MicroPython in the browser, instantly. C/C++ when running locally.
 
 [![Live](https://img.shields.io/badge/try%20it-lvglsim.dev-blue?style=flat-square)](https://lvglsim.dev)
 [![LVGL](https://img.shields.io/badge/LVGL-v9.2.2-brightgreen?style=flat-square)](https://lvgl.io)
@@ -23,7 +23,7 @@ MicroPython and C/C++ — in the browser, instantly.
 ### Editor
 - **Monaco Editor** — full VS Code experience: syntax highlighting, autocomplete, multi-cursor
 - **MicroPython** — run LVGL Python code instantly via the MicroPython + LVGL WASM runtime
-- **C / C++** — compile and run real C/C++ LVGL code via a server-side Emscripten pipeline
+- **C / C++** — compile and run C/C++ LVGL code via Emscripten _(local server required — not available on lvglsim.dev)_
 - **Open files** — load `.py`, `.c`, `.cpp`, `.h`, `.hpp` files directly into the editor
 - **Clickable errors** — compiler errors jump to the exact line in the editor
 - **Keyboard shortcuts** — see the full list with the keyboard icon button (⌘ on macOS, Ctrl on Windows/Linux)

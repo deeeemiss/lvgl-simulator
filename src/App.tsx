@@ -139,7 +139,11 @@ export default function App() {
               <span style={{ paddingLeft: 16, opacity: 0.8 }}>No live preview — press Run after each change.</span>
             </div>
           )}
-          <LanguageSelector language={language} onChange={handleLanguageChange} />
+          <LanguageSelector
+            language={language}
+            onChange={handleLanguageChange}
+            disabledLangs={import.meta.env.VITE_ENABLE_CPP === 'true' ? [] : ['cpp']}
+          />
           <div style={{ flex: 1, minHeight: 0 }}>
             <Editor value={code} language={language} onChange={setCode} editorRef={monacoEditorRef} />
           </div>
