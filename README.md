@@ -1,10 +1,20 @@
+<div align="center">
+
 # LVGL Web Simulator
 
-A browser-based simulator for [LVGL](https://lvgl.io) — write LVGL code in **MicroPython** or **C/C++** and see real-time rendering instantly, no installation required.
+**Write LVGL code. See it run. No install required.**
 
-Think of it as **CodePen for LVGL**.
+MicroPython and C/C++ — in the browser, instantly.
 
-> **VS Code user?** Check out the [LVGL Simulator extension](https://github.com/deeeemiss/lvgl-simulator-vscode) — live preview for MicroPython and C/C++ directly inside VS Code, with local Emscripten compilation.
+[![Live](https://img.shields.io/badge/try%20it-lvglsim.dev-blue?style=flat-square)](https://lvglsim.dev)
+[![LVGL](https://img.shields.io/badge/LVGL-v9.2.2-brightgreen?style=flat-square)](https://lvgl.io)
+[![License](https://img.shields.io/badge/license-MIT-grey?style=flat-square)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-MicroPython-yellow?style=flat-square)]()
+[![C/C++](https://img.shields.io/badge/C%2FC%2B%2B-Emscripten-orange?style=flat-square)]()
+
+[Try it live](https://lvglsim.dev) · [Features](#features) · [How it works](#how-it-works) · [Run locally](#getting-started) · [Write LVGL code](#writing-lvgl-code)
+
+</div>
 
 ---
 
@@ -15,22 +25,19 @@ Think of it as **CodePen for LVGL**.
 - **MicroPython** — run LVGL Python code instantly via the MicroPython + LVGL WASM runtime
 - **C / C++** — compile and run real C/C++ LVGL code via a server-side Emscripten pipeline
 - **Open files** — load `.py`, `.c`, `.cpp`, `.h`, `.hpp` files directly into the editor
-- **Clickable errors** — compiler errors are clickable and jump to the exact line in the editor
+- **Clickable errors** — compiler errors jump to the exact line in the editor
 - **Keyboard shortcuts** — see the full list with the keyboard icon button (⌘ on macOS, Ctrl on Windows/Linux)
 
 ### Preview
-- **Live mode (Python)** — click Run to enter live mode; edits auto-run after an 800ms debounce
-- **C/C++ compile & run** — click Run to compile server-side via Emscripten; output streams live during compilation. No live preview — each change requires a new Run.
-- **Stop** — exits live mode and clears the canvas
-- **Multiple resolutions** — 480×320, 800×480, 1280×720; elements scale proportionally at higher resolutions
-- **Aspect-ratio scaling** — preview fits available space; dragging the output panel shrinks the canvas proportionally
-- **Fullscreen** — enter/exit fullscreen from the preview controls; aspect ratio is preserved
-- **Pop-out window** — open the preview in a separate window (drag it to a second monitor)
+- **Live mode (Python)** — edits auto-run after an 800ms debounce
+- **C/C++ compile & run** — compiles server-side via Emscripten; output streams live
+- **Multiple resolutions** — 480×320, 800×480, 1280×720 with proportional scaling
+- **Fullscreen** — aspect ratio preserved
+- **Pop-out window** — drag it to a second monitor
 
 ### UI
-- **Light / dark theme** — toggle with the ☀/🌙 button; preference persisted in localStorage (default: dark)
-- **Resizable output panel** — drag the top edge to resize; height persisted in localStorage
-- **Output panel** — shows `print()` / `printf()` output and runtime errors with color coding
+- **Light / dark theme** — persisted in localStorage (default: dark)
+- **Resizable output panel** — `print()` / `printf()` output + runtime errors, color-coded
 - **Compile timing** — shows how long C/C++ compilation took
 
 ### Keyboard shortcuts
@@ -49,7 +56,7 @@ Think of it as **CodePen for LVGL**.
 
 ---
 
-## How It Works
+## How it works
 
 ### Python (MicroPython) — runs entirely in the browser
 
@@ -73,13 +80,9 @@ Think of it as **CodePen for LVGL**.
 └────────────────────────────────────────────────────────┘
 ```
 
-**Execution flow:**
-1. User clicks **Run** (or edits code in live mode)
-2. Runner prepends a screen reset (`lv.obj(None)` + `lv.screen_load()`) to clear previous state
-3. `mp_js_do_str` executes the script; LVGL draws pixels to the parent canvas — visible instantly
-
-**Asyncify conflict prevention:**
-`mp_js_do_str` and `mp_handle_pending` are both asyncified — only one can be active at a time. An `executingCode` flag pauses the ticker loop during script execution.
+1. User clicks **Run** (or edits in live mode)
+2. Runner prepends a screen reset to clear previous state
+3. `mp_js_do_str` executes the script; LVGL draws pixels instantly
 
 ### C / C++ — compiled server-side via Emscripten
 
@@ -102,20 +105,17 @@ Think of it as **CodePen for LVGL**.
 └─────────────────────┘
 ```
 
-**Execution flow:**
-1. User clicks **Run**
-2. Code is sent to the server; Emscripten compiles it (`em++`) with LVGL and SDL2 — full C++ supported (classes, templates, STL)
-3. Compiler output streams to the browser in real time via SSE
-4. On success, the server stores the JS+WASM artifact and returns an artifact ID
-5. The browser loads `c-runner.html?id=...` in a visible iframe; SDL2 renders to the iframe's canvas
+1. Code sent to server; `em++` compiles with LVGL + SDL2 — full C++ (classes, templates, STL)
+2. Compiler output streams to browser in real time via SSE
+3. On success, browser loads the artifact in a sandboxed iframe; SDL2 renders to canvas
 
 | Component | Role |
 |-----------|------|
 | `lv_micropython` WASM | MicroPython + LVGL runtime compiled to WebAssembly |
-| `em++` (server) | Emscripten C++ compiler, builds LVGL + user code to WASM — supports full C++ |
-| SSE streaming | Compile output is streamed line by line to the browser |
-| Artifact store | Compiled JS+WASM files stored on server with 1h TTL |
-| `c-runner.html` | Iframe page that loads the compiled artifact and renders via SDL2 |
+| `em++` (server) | Emscripten C++ compiler |
+| SSE streaming | Compile output streamed line by line |
+| Artifact store | Compiled JS+WASM stored with 1h TTL |
+| `c-runner.html` | Sandboxed iframe runner |
 
 ---
 
@@ -124,10 +124,10 @@ Think of it as **CodePen for LVGL**.
 ### Prerequisites
 
 - Node.js 18+
-- WASM files from [sim.lvgl.io](https://sim.lvgl.io) (for Python mode — see below)
+- WASM files (for Python mode — see below)
 - Docker + Docker Compose (for C/C++ compilation server)
 
-### Run locally (Python mode only)
+### Python mode only
 
 ```bash
 npm install
@@ -136,19 +136,15 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173).
 
-### Run with C/C++ compilation server
+### With C/C++ compilation server
 
 ```bash
-# Start the compilation server
-cd server
-docker-compose up --build
-
-# In another terminal, start the frontend
-npm install
-npm run dev
+cd server && docker-compose up --build
+# in another terminal:
+npm install && npm run dev
 ```
 
-The Vite dev server proxies `/api/*` to the compilation server at `http://localhost:3001`.
+Vite proxies `/api/*` → `http://localhost:3001`.
 
 ### Build
 
@@ -158,7 +154,7 @@ npm run build
 
 ### WASM files (Python mode)
 
-Place these in `public/wasm/`:
+Place in `public/wasm/`:
 
 ```
 public/wasm/
@@ -167,11 +163,9 @@ public/wasm/
   wasm_file_api.js     # BrowserFS file API bridge
 ```
 
-These are sourced from [sim.lvgl.io](https://sim.lvgl.io).
-
 ---
 
-## Writing LVGL Code
+## Writing LVGL code
 
 ### MicroPython
 
@@ -189,11 +183,9 @@ label.set_text("Hello LVGL!")
 label.center()
 ```
 
-> `lv.init()` and the display driver are initialized automatically — no need to call them manually.
+> `lv.init()` and the display driver are initialized automatically.
 
 ### C / C++
-
-Define `void lv_user_setup(void)` as your entry point — the simulator calls it after LVGL and SDL2 are initialized.
 
 ```c
 #include "lvgl.h"
@@ -211,9 +203,9 @@ void lv_user_setup(void) {
 }
 ```
 
-> The display, SDL2 driver, and LVGL tick are all set up automatically. Just implement `lv_user_setup`.
+> Define `void lv_user_setup(void)` as your entry point. Display, SDL2 driver, and LVGL tick are all set up automatically.
 
-> **Note:** C/C++ has no live preview — press Run after each change. C++ features (classes, templates, STL) are fully supported.
+> C/C++ has no live preview — press Run after each change.
 
 ---
 
@@ -221,9 +213,9 @@ void lv_user_setup(void) {
 
 - **React 18** + **TypeScript** + **Vite**
 - **Monaco Editor** (`@monaco-editor/react`)
-- **lv_micropython** WASM — MicroPython + LVGL, compiled with Emscripten
+- **lv_micropython** WASM — MicroPython + LVGL compiled with Emscripten
 - **Node.js** + **Emscripten** — server-side C/C++ compilation
-- **Docker** — containerized Emscripten build environment
+- **Docker** — containerized build environment
 
 ---
 
