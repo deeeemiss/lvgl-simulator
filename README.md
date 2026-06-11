@@ -1,6 +1,6 @@
 <div align="center">
 
-# LVGL Web Simulator
+# LVGL Simulator
 
 **Write LVGL code. See it run. No install required.**
 
