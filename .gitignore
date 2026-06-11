@@ -4,3 +4,5 @@ dist/
 pw-*.mjs
 *.log
 .vercel
+.env.local
+.env.*.local
