@@ -6,17 +6,20 @@ import type { Resolution } from './components/DisplayCanvas';
 import { Toolbar } from './components/Toolbar';
 import { StatusBar } from './components/StatusBar';
 import { useSimulator } from './hooks/useSimulator';
+import { useSharedSnippet, useShareToClipboard } from './hooks/useShareLink';
 import { useTheme } from './ThemeContext';
 
 const AUTO_RUN_DELAY = 800;
 
 export default function App() {
   const { theme } = useTheme();
-  const [code, setCode] = useState(DEFAULT_CODE);
+  const sharedSnippet = useSharedSnippet();
+  const [code, setCode] = useState(sharedSnippet?.code ?? DEFAULT_CODE);
   const [resolution, setResolution] = useState<Resolution>(RESOLUTIONS[0]);
   const [liveMode, setLiveMode] = useState(false);
   const [popoutOpen, setPopoutOpen] = useState(false);
-  const [language, setLanguage] = useState('python');
+  const [language, setLanguage] = useState(sharedSnippet?.language ?? 'python');
+  const { share: shareToClipboard, status: shareStatus } = useShareToClipboard();
   const { status, output, iframeRef, cArtifactId, run, stop, clearOutput } = useSimulator();
   const prevResolutionRef = useRef(resolution);
   const autoRunTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -72,6 +75,7 @@ export default function App() {
   }, [handleStop]);
 
   const handleRun = useCallback(() => { if (language !== 'cpp') setLiveMode(true); runWithContext(code); }, [runWithContext, code, language]);
+  const handleShare = useCallback(() => { shareToClipboard(code, language); }, [shareToClipboard, code, language]);
 
   // After resolution change in Python live mode, re-run when iframe signals ready.
   // Listen to postMessage directly so we trigger on every fresh 'ready' (status alone may not change).
@@ -137,6 +141,8 @@ export default function App() {
         onResolutionChange={handleResolutionChange}
         onFileLoad={handleFileLoad}
         canRun={language === 'cpp' ? canRunC : canRun}
+        onShare={handleShare}
+        shareStatus={shareStatus}
       />
 
       <div className="lvgl-split" style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>

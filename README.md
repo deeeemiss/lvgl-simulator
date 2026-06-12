@@ -40,6 +40,7 @@ MicroPython in the browser, instantly. C/C++ when running locally.
 - **Light / dark theme** — persisted in localStorage (default: dark)
 - **Resizable output panel** — `print()` / `printf()` output + runtime errors, color-coded
 - **Compile timing** — shows how long C/C++ compilation took
+- **Share** — click Share to copy a self-contained URL of your snippet to the clipboard. The code is encoded (and compressed with lz-string) in the URL fragment — no backend, no DB, no account.
 
 ### Keyboard shortcuts
 
