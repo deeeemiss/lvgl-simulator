@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e0d1c"/>
+      <stop offset="0.55" stop-color="#1a1530"/>
+      <stop offset="1" stop-color="#2a1e4d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.18" cy="0.32" r="0.55">
+      <stop offset="0" stop-color="#863bff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#863bff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#a76aff"/>
+      <stop offset="1" stop-color="#7e14ff"/>
+    </linearGradient>
+    <filter id="boltGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0 L0 0 0 40" fill="none" stroke="#ffffff" stroke-opacity="0.025" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- LVGL lightning bolt — repositioned/scaled from favicon -->
+  <g transform="translate(140 130) scale(4.5)" filter="url(#boltGlow)">
+    <path fill="url(#bolt)" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z"/>
+  </g>
+
+  <!-- Title -->
+  <text x="140" y="430" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="92" font-weight="700" fill="#ffffff" letter-spacing="-2">
+    LVGL Simulator
+  </text>
+
+  <!-- Tagline -->
+  <text x="140" y="495" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="36" font-weight="400" fill="#c8bce0" letter-spacing="-0.5">
+    Write LVGL code. See it run.
+  </text>
+
+  <!-- Footer URL -->
+  <g transform="translate(140 565)">
+    <circle cx="8" cy="-10" r="6" fill="#4ade80"/>
+    <text x="28" y="-4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="22" font-weight="500" fill="#9ca3af" letter-spacing="0.5">
+      lvglsim.dev
+    </text>
+  </g>
+
+  <!-- Tech badges right side -->
+  <g transform="translate(770 480)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" font-size="20" font-weight="600">
+    <g>
+      <rect x="0" y="0" width="120" height="36" rx="6" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.12"/>
+      <text x="60" y="24" text-anchor="middle" fill="#e8def8">Python</text>
+    </g>
+    <g transform="translate(130 0)">
+      <rect x="0" y="0" width="120" height="36" rx="6" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.12"/>
+      <text x="60" y="24" text-anchor="middle" fill="#e8def8">C / C++</text>
+    </g>
+    <g transform="translate(260 0)">
+      <rect x="0" y="0" width="120" height="36" rx="6" fill="#ffffff" fill-opacity="0.08" stroke="#ffffff" stroke-opacity="0.12"/>
+      <text x="60" y="24" text-anchor="middle" fill="#e8def8">WASM</text>
+    </g>
+  </g>
+</svg>
